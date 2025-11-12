@@ -561,7 +561,7 @@
 
     ranking.forEach((r, i) => {
       const tempoStr = r.tempo > 0 ? `(${r.tempo}s)` : '(Tempo máximo)';
-      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: **${r.pontos} pontos** ${tempoStr}</p>`;
+      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: ${r.pontos} pontos ${tempoStr}</p>`;
     });
 
     document.getElementById("game-area").style.display = "none";
