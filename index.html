@@ -115,6 +115,11 @@
     margin-top: 20px;
     display: none;
   }
+  
+  /* ⭐️ NOVO: Classe para forçar o negrito no ranking */
+  .rank-highlight {
+    font-weight: bold;
+  }
 
   .back-button {
     position: fixed;
@@ -246,19 +251,19 @@
   <div class="modal-content">
     <h2>🏆 Regras do Quiz de Encaixe 🧩</h2>
     <div id="rules-text">
-      <p>Este é um jogo de encaixe de conceitos. Seu objetivo é arrastar e soltar as peças de Respostas (Azuis) nos slots correspondentes às Perguntas (Descrições).</p>
+      <p>Este é um jogo de encaixe de conceitos. Seu objetivo é arrastar e soltar as peças de <strong>Respostas (Azuis)</strong> nos slots correspondentes às <strong>Perguntas (Descrições)</strong>.</p>
       
       <h3>Como Funciona a Pontuação?</h3>
       <ul>
-        <li>✅ Você ganha 1 ponto para cada resposta correta.</li>
+        <li>✅ Você ganha <strong>1 ponto</strong> para cada resposta correta.</li>
         <li>❌ Respostas erradas não geram pontos, mas podem ser corrigidas antes de finalizar a tentativa.</li>
       </ul>
       
       <h3>Modo Multiplayer (Hotseat)</h3>
       <ul>
         <li>O jogo funciona com todos os participantes no mesmo dispositivo.</li>
-        <li>Cada jogador tem 5 minutos para preencher a tabela.</li>
-        <li>O Ranking Final é definido pela maior pontuação. Em caso de empate, o jogador com a mesma pontuação, mas que usou menos tempo para completar o turno, fica em posição superior.</li>
+        <li>Cada jogador tem <strong>5 minutos</strong> para preencher a tabela.</li>
+        <li>O Ranking Final é definido pela <strong>maior pontuação</strong>. Em caso de empate, o jogador com a mesma pontuação, mas que usou <strong>menos tempo</strong> para completar o turno, fica em posição superior.</li>
       </ul>
       
     </div>
@@ -504,7 +509,7 @@
     scores[currentPlayerIndex] = acertos;
     times[currentPlayerIndex] = totalTime - timeLeft; 
     
-    // ⭐️ CORREÇÃO AQUI: Verifica singular/plural
+    // Verifica singular/plural
     const palavraPontuacao = acertos === 1 ? 'ponto' : 'pontos';
     
     document.getElementById("result").textContent = `Você acertou ${acertos} de ${perguntas.length}!`;
@@ -564,10 +569,11 @@
     ranking.forEach((r, i) => {
       const tempoStr = r.tempo > 0 ? `(${r.tempo}s)` : '(Tempo máximo)';
       
-      // ⭐️ CORREÇÃO AQUI: Verifica singular/plural para o Ranking
+      // Verifica singular/plural para o Ranking
       const palavraPontuacao = r.pontos === 1 ? 'ponto' : 'pontos';
       
-      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: ${r.pontos} ${palavraPontuacao} ${tempoStr}</p>`;
+      // ⭐️ CORREÇÃO APLICADA AQUI: Usando <span> com a classe 'rank-highlight'
+      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: <span class="rank-highlight">${r.pontos} ${palavraPontuacao}</span> ${tempoStr}</p>`;
     });
 
     document.getElementById("game-area").style.display = "none";
