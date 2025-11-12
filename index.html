@@ -94,11 +94,11 @@
 <body>
 
 <a href="#" class="back-button" onclick="location.reload()">← Reiniciar</a>
-<h1>Quiz de Encaixe - Modo Multiplayer</h1>
+<h1 id="game-title">Quiz de Encaixe - Modo Single Player</h1>
 
 <div class="config">
   <label>Modo de jogo:</label>
-  <select id="numPlayers">
+  <select id="numPlayers" onchange="updateTitle()">
     <option value="1">Single Player</option>
     <option value="2">2 Jogadores</option>
     <option value="3">3 Jogadores</option>
@@ -113,7 +113,7 @@
   <div id="timer">Tempo: 5:00</div>
   <div id="shadow-board"></div>
   <div id="pieces"></div>
-  <button id="verify" onclick="verificar()">Verificar Respostas</button>
+  <button id="verify" onclick="verificar()">Finalizar Tentativa</button>
   <div id="result"></div>
 </div>
 
@@ -143,6 +143,17 @@
   let scores = [];
   let timerInterval;
   let timeLeft = 300; // 5 minutos
+
+  // MUDANÇA 4: Nova função para atualizar o título
+  function updateTitle() {
+    const numPlayers = parseInt(document.getElementById("numPlayers").value);
+    const gameTitle = document.getElementById("game-title");
+    if (numPlayers === 1) {
+      gameTitle.textContent = "Quiz de Encaixe - Modo Single Player";
+    } else {
+      gameTitle.textContent = "Quiz de Encaixe - Modo Multiplayer";
+    }
+  }
 
   function startGame() {
     const numPlayers = parseInt(document.getElementById("numPlayers").value);
@@ -206,7 +217,7 @@
     const slot = e.target;
     const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === resposta);
 
-    if (!slot.textContent.includes("→")) {
+    if (slot.classList.contains('shadow-slot') && !slot.dataset.userAnswer) { // Evita soltar sobre texto
       slot.textContent += ` → ${resposta}`;
       slot.dataset.userAnswer = resposta;
       piece.classList.add("used");
