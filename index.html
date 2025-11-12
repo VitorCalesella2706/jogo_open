@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
@@ -80,9 +80,9 @@
   .shadow-slot.correct { background-color: #a8e6a3; }
   .shadow-slot.wrong { background-color: #f5a3a3; }
 
-  /* MUDANÇA: Largura da peça de resposta (Peça Azul) voltando para 150px */
+  /* Largura da peça de resposta (Peça Azul) */
   .piece {
-    width: 150px; /* Largura restaurada */
+    width: 150px; 
     height: 50px;
     background-color: #3498db;
     color: white;
@@ -126,6 +126,75 @@
     border-radius: 6px;
     text-decoration: none;
   }
+  
+  /* -------------------------------------- */
+  /* ESTILOS DO MODAL CUSTOMIZADO (NOVO) */
+  /* -------------------------------------- */
+  #player-name-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Fundo escuro transparente */
+    display: none; /* Começa oculto */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background-color: #ecf0f1;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    width: 80%;
+    max-width: 400px;
+    text-align: left;
+  }
+
+  .modal-content h2 {
+    color: #2c3e50;
+    margin-top: 0;
+    border-bottom: 2px solid #bdc3c7;
+    padding-bottom: 10px;
+    text-align: center;
+  }
+
+  .player-input-group {
+    margin-bottom: 15px;
+  }
+
+  .player-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #34495e;
+  }
+
+  .player-input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; 
+  }
+
+  #submitNames {
+    width: 100%;
+    padding: 10px;
+    background-color: #2ecc71; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  #submitNames:hover {
+    background-color: #27ae60;
+  }
 </style>
 </head>
 <body>
@@ -157,6 +226,14 @@
 
 <div id="ranking"></div>
 
+<div id="player-name-modal">
+  <div class="modal-content">
+    <h2>Insira os Nomes dos Jogadores</h2>
+    <div id="names-form">
+      </div>
+    <button id="submitNames" onclick="submitNames()">Começar o Quiz</button>
+  </div>
+</div>
 <script>
   const perguntas = [
     { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
@@ -181,33 +258,83 @@
   let scores = [];
   let timerInterval;
   let timeLeft = 300; // 5 minutos
+  
+  // NOVA VARIÁVEL GLOBAL
+  let selectedNumPlayers = 1;
 
   function updateTitle() {
-    const numPlayers = parseInt(document.getElementById("numPlayers").value);
+    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value); // ATUALIZADO
     const gameTitle = document.getElementById("game-title");
-    if (numPlayers === 1) {
+    if (selectedNumPlayers === 1) {
       gameTitle.textContent = "Quiz de Encaixe - Modo Single Player";
     } else {
       gameTitle.textContent = "Quiz de Encaixe - Modo Multiplayer";
     }
   }
 
+  // FUNÇÃO STARTGAME MODIFICADA
   function startGame() {
-    const numPlayers = parseInt(document.getElementById("numPlayers").value);
-    const namesDiv = document.getElementById("names");
-    players = [];
-    scores = new Array(numPlayers).fill(0);
-
-    for (let i = 1; i <= numPlayers; i++) {
-      const name = prompt(`Nome do Jogador ${i}:`) || `Jogador ${i}`;
-      players.push(name);
-    }
-
+    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
+    
     document.querySelector(".config").style.display = "none";
-    document.getElementById("game-area").style.display = "block";
-    iniciarRodada();
+    
+    if (selectedNumPlayers === 1) {
+        players = ["Jogador"];
+        scores = [0];
+        document.getElementById("game-area").style.display = "block";
+        iniciarRodada();
+    } else {
+        // Se for Multiplayer, exibe o modal
+        showNameModal(selectedNumPlayers);
+    }
   }
 
+  // ⭐️ FUNÇÃO NOVA: Cria e exibe os inputs de nome no modal
+  function showNameModal(num) {
+      const namesForm = document.getElementById("names-form");
+      namesForm.innerHTML = "";
+      
+      for (let i = 1; i <= num; i++) {
+          const group = document.createElement('div');
+          group.className = 'player-input-group';
+          
+          const label = document.createElement('label');
+          label.textContent = `Nome do Jogador ${i}:`;
+          label.htmlFor = `player${i}`;
+
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.id = `player${i}`;
+          input.placeholder = `Nome do Jogador ${i}`;
+          
+          group.appendChild(label);
+          group.appendChild(input);
+          namesForm.appendChild(group);
+      }
+
+      document.getElementById("player-name-modal").style.display = "flex";
+  }
+
+  // ⭐️ FUNÇÃO NOVA: Coleta os nomes e inicia o jogo
+  function submitNames() {
+      players = [];
+      for (let i = 1; i <= selectedNumPlayers; i++) {
+          const inputElement = document.getElementById(`player${i}`);
+          let name = inputElement.value.trim();
+
+          if (name === "") {
+              name = `Jogador ${i}`;
+          }
+          players.push(name);
+      }
+
+      scores = new Array(selectedNumPlayers).fill(0);
+      
+      document.getElementById("player-name-modal").style.display = "none";
+      document.getElementById("game-area").style.display = "block";
+      iniciarRodada();
+  }
+  
   function iniciarRodada() {
     document.getElementById("result").textContent = "";
     const currentPlayer = players[currentPlayerIndex];
