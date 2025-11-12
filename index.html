@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
@@ -31,8 +31,9 @@
     margin: 20px 0;
   }
 
+  /* Largura do Slot de Pergunta (Descrição) mantida em 250px */
   .shadow-slot {
-    width: 150px;
+    width: 250px; 
     height: 60px;
     border: 2px dashed #ccc;
     background-color: #ecf0f1;
@@ -40,8 +41,11 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    position: relative; /* Para posicionar o X dentro dele */
-    padding-right: 25px; /* Espaço para o X */
+    position: relative; 
+    padding-right: 25px; 
+    padding-left: 5px; 
+    text-align: left; 
+    font-size: 0.85em; 
   }
 
   /* NOVO CSS: Estilo para o ícone de remover 'X' */
@@ -52,22 +56,33 @@
     transform: translateY(-50%);
     cursor: pointer;
     font-weight: bold;
-    color: #e74c3c; /* Vermelho para o X */
+    color: #e74c3c; 
     font-size: 1.2em;
     padding: 0 5px;
     border-radius: 50%;
     transition: background-color 0.2s;
   }
+  
+  /* NOVO CSS: Garante que os spans dentro do slot se ajustem */
+  .shadow-slot span {
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal;
+      line-height: 1.2;
+  }
 
   .remove-icon:hover {
-    background-color: rgba(231, 76, 60, 0.2); /* Fundo sutil ao passar o mouse */
+    background-color: rgba(231, 76, 60, 0.2); 
   }
 
   .shadow-slot.correct { background-color: #a8e6a3; }
   .shadow-slot.wrong { background-color: #f5a3a3; }
 
+  /* MUDANÇA: Largura da peça de resposta (Peça Azul) voltando para 150px */
   .piece {
-    width: 150px;
+    width: 150px; /* Largura restaurada */
     height: 50px;
     background-color: #3498db;
     color: white;
@@ -76,6 +91,7 @@
     align-items: center;
     justify-content: center;
     cursor: grab;
+    font-size: 0.9em; 
   }
 
   .piece.used {
@@ -142,7 +158,6 @@
 <div id="ranking"></div>
 
 <script>
-  // MUDANÇA: Lista de perguntas atualizada com a descrição como "pergunta" e o método como "resposta"
   const perguntas = [
     { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
     { pergunta: "Corrente elétrica deposita camada metálica sobre a superfície.", resposta: "Eletrodeposição" },
@@ -211,7 +226,7 @@
       const slot = document.createElement("div");
       slot.className = "shadow-slot";
       slot.dataset.resposta = p.resposta;
-      slot.textContent = p.pergunta; // Inicialmente, só a pergunta
+      slot.textContent = p.pergunta; 
 
       slot.dataset.pergunta = p.pergunta; 
 
@@ -249,11 +264,11 @@
       // NOVO: Adiciona um span para o texto da pergunta e outro para a resposta
       const questionText = document.createElement('span');
       questionText.textContent = slot.dataset.pergunta;
-      questionText.classList.add('question-text'); // Opcional, para estilização
+      questionText.classList.add('question-text'); 
 
       const answerText = document.createElement('span');
       answerText.textContent = ` → ${resposta}`;
-      answerText.classList.add('answer-text'); // Opcional, para estilização
+      answerText.classList.add('answer-text'); 
 
       const removeIcon = document.createElement('span');
       removeIcon.textContent = 'X';
@@ -261,11 +276,11 @@
       
       // NOVO: Adiciona um ouvinte de clique APENAS no 'X'
       removeIcon.addEventListener('click', (event) => {
-        event.stopPropagation(); // Impede que o clique no X propague para o slot
+        event.stopPropagation(); 
         removerResposta(slot);
       });
 
-      slot.innerHTML = ''; // Limpa o slot antes de adicionar os novos elementos
+      slot.innerHTML = ''; 
       slot.appendChild(questionText);
       slot.appendChild(answerText);
       slot.appendChild(removeIcon);
