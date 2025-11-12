@@ -40,6 +40,27 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
+    position: relative; /* Para posicionar o X dentro dele */
+    padding-right: 25px; /* Espaço para o X */
+  }
+
+  /* NOVO CSS: Estilo para o ícone de remover 'X' */
+  .remove-icon {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-weight: bold;
+    color: #e74c3c; /* Vermelho para o X */
+    font-size: 1.2em;
+    padding: 0 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+  }
+
+  .remove-icon:hover {
+    background-color: rgba(231, 76, 60, 0.2); /* Fundo sutil ao passar o mouse */
   }
 
   .shadow-slot.correct { background-color: #a8e6a3; }
@@ -94,6 +115,7 @@
 <body>
 
 <a href="#" class="back-button" onclick="location.reload()">← Reiniciar</a>
+
 <h1 id="game-title">Quiz de Encaixe - Modo Single Player</h1>
 
 <div class="config">
@@ -120,22 +142,23 @@
 <div id="ranking"></div>
 
 <script>
+  // MUDANÇA: Lista de perguntas atualizada com a descrição como "pergunta" e o método como "resposta"
   const perguntas = [
-    { pergunta: "Capital da França", resposta: "Paris" },
-    { pergunta: "Maior planeta do Sistema Solar", resposta: "Júpiter" },
-    { pergunta: "Metal usado em fios elétricos", resposta: "Cobre" },
-    { pergunta: "Animal símbolo da Austrália", resposta: "Canguru" },
-    { pergunta: "Cor do céu em um dia claro", resposta: "Azul" },
-    { pergunta: "Planeta vermelho", resposta: "Marte" },
-    { pergunta: "Maior oceano do mundo", resposta: "Pacífico" },
-    { pergunta: "Animal que mia", resposta: "Gato" },
-    { pergunta: "Animal que late", resposta: "Cachorro" },
-    { pergunta: "Principal gás da atmosfera", resposta: "Nitrogênio" },
-    { pergunta: "Líquido essencial à vida", resposta: "Água" },
-    { pergunta: "Instrumento com 6 cordas", resposta: "Violão" },
-    { pergunta: "Continente do Egito", resposta: "África" },
-    { pergunta: "Objeto usado para escrever", resposta: "Caneta" },
-    { pergunta: "Combustível dos carros", resposta: "Gasolina" }
+    { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
+    { pergunta: "Corrente elétrica deposita camada metálica sobre a superfície.", resposta: "Eletrodeposição" },
+    { pergunta: "Revestimento físico, sem reação química.", resposta: "PVD (Deposição Física no Vapor)" },
+    { pergunta: "Revestimento obtido por reação química em fase gasosa.", resposta: "CVD (Deposição Química no Vapor)" },
+    { pergunta: "Material fundido é pulverizado sobre a peça.", resposta: "Aspersão térmica" },
+    { pergunta: "União de metal nobre sobre outro para proteger.", resposta: "Cladeamento (Cladding)" },
+    { pergunta: "Íons são inseridos na superfície para aumentar dureza.", resposta: "Implantação iônica" },
+    { pergunta: "Endurece e melhora a superfície sem alterar o interior.", resposta: "Tratamento a laser" },
+    { pergunta: "Cria camada protetora e melhora aderência de tintas.", resposta: "Fosfatização" },
+    { pergunta: "Aumenta resistência e permite coloração do alumínio.", resposta: "Anodização" },
+    { pergunta: "Revestimento químico que evita corrosão.", resposta: "Cromatização" },
+    { pergunta: "Revestimento de zinco para proteger o aço contra ferrugem.", resposta: "Galvanização" },
+    { pergunta: "Suaviza a superfície por ação elétrica e química.", resposta: "Polimento eletrolítico" },
+    { pergunta: "Introduz nitrogênio na superfície para endurecer o aço.", resposta: "Nitretação" },
+    { pergunta: "Forma óxidos protetores na superfície metálica.", resposta: "Oxidação térmica" }
   ];
 
   let currentPlayerIndex = 0;
@@ -144,7 +167,6 @@
   let timerInterval;
   let timeLeft = 300; // 5 minutos
 
-  // MUDANÇA 4: Nova função para atualizar o título
   function updateTitle() {
     const numPlayers = parseInt(document.getElementById("numPlayers").value);
     const gameTitle = document.getElementById("game-title");
@@ -161,7 +183,6 @@
     players = [];
     scores = new Array(numPlayers).fill(0);
 
-    // coleta nomes
     for (let i = 1; i <= numPlayers; i++) {
       const name = prompt(`Nome do Jogador ${i}:`) || `Jogador ${i}`;
       players.push(name);
@@ -190,9 +211,13 @@
       const slot = document.createElement("div");
       slot.className = "shadow-slot";
       slot.dataset.resposta = p.resposta;
-      slot.textContent = p.pergunta;
+      slot.textContent = p.pergunta; // Inicialmente, só a pergunta
+
+      slot.dataset.pergunta = p.pergunta; 
+
       slot.addEventListener("dragover", e => e.preventDefault());
       slot.addEventListener("drop", soltar);
+      
       shadowBoard.appendChild(slot);
     });
 
@@ -213,17 +238,66 @@
   }
 
   function soltar(e) {
+    e.preventDefault(); 
     const resposta = e.dataTransfer.getData("text");
-    const slot = e.target;
+    
+    const slot = e.target.closest('.shadow-slot'); 
+    
     const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === resposta);
 
-    if (slot.classList.contains('shadow-slot') && !slot.dataset.userAnswer) { // Evita soltar sobre texto
-      slot.textContent += ` → ${resposta}`;
+    if (slot && !slot.dataset.userAnswer) {
+      // NOVO: Adiciona um span para o texto da pergunta e outro para a resposta
+      const questionText = document.createElement('span');
+      questionText.textContent = slot.dataset.pergunta;
+      questionText.classList.add('question-text'); // Opcional, para estilização
+
+      const answerText = document.createElement('span');
+      answerText.textContent = ` → ${resposta}`;
+      answerText.classList.add('answer-text'); // Opcional, para estilização
+
+      const removeIcon = document.createElement('span');
+      removeIcon.textContent = 'X';
+      removeIcon.classList.add('remove-icon');
+      
+      // NOVO: Adiciona um ouvinte de clique APENAS no 'X'
+      removeIcon.addEventListener('click', (event) => {
+        event.stopPropagation(); // Impede que o clique no X propague para o slot
+        removerResposta(slot);
+      });
+
+      slot.innerHTML = ''; // Limpa o slot antes de adicionar os novos elementos
+      slot.appendChild(questionText);
+      slot.appendChild(answerText);
+      slot.appendChild(removeIcon);
+      
       slot.dataset.userAnswer = resposta;
       piece.classList.add("used");
       piece.draggable = false;
     }
   }
+
+  function removerResposta(slot) {
+    const respostaAntiga = slot.dataset.userAnswer;
+    
+    if (!respostaAntiga) {
+      return; 
+    }
+
+    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === respostaAntiga);
+
+    if (piece) {
+      piece.classList.remove("used");
+      piece.draggable = true;
+    }
+
+    // NOVO: Restaura o slot apenas com o texto da pergunta
+    slot.innerHTML = ''; 
+    slot.textContent = slot.dataset.pergunta;
+
+    delete slot.dataset.userAnswer;
+    slot.classList.remove("correct", "wrong");
+  }
+
 
   function verificar() {
     let acertos = 0;
