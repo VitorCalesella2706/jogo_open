@@ -303,9 +303,7 @@
   
   let selectedNumPlayers = 1;
 
-  // Removido o window.onload. O modal de regras aparece via CSS.
-
-  // ⭐️ FUNÇÃO NOVA: Fecha o modal de regras e mostra a configuração inicial
+  // FUNÇÃO NOVA: Fecha o modal de regras e mostra a configuração inicial
   function closeRulesAndShowConfig() {
       document.getElementById("rules-modal").style.display = "none";
       document.querySelector(".config").style.display = "block"; 
@@ -376,7 +374,7 @@
       }
 
       scores = new Array(selectedNumPlayers).fill(0);
-      times = new Array(selectedNumPlayers).fill(0); // O tempo gasto começa em 0
+      times = new Array(selectedNumPlayers).fill(0); 
       
       document.getElementById("player-name-modal").style.display = "none";
       document.getElementById("game-area").style.display = "block";
@@ -506,7 +504,11 @@
     scores[currentPlayerIndex] = acertos;
     times[currentPlayerIndex] = totalTime - timeLeft; 
     
+    // ⭐️ CORREÇÃO AQUI: Verifica singular/plural
+    const palavraPontuacao = acertos === 1 ? 'ponto' : 'pontos';
+    
     document.getElementById("result").textContent = `Você acertou ${acertos} de ${perguntas.length}!`;
+    document.getElementById("result").textContent += ` Pontuação: ${acertos} ${palavraPontuacao}.`;
 
     clearInterval(timerInterval);
     setTimeout(proximaRodada, 4000);
@@ -561,7 +563,11 @@
 
     ranking.forEach((r, i) => {
       const tempoStr = r.tempo > 0 ? `(${r.tempo}s)` : '(Tempo máximo)';
-      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: ${r.pontos} pontos ${tempoStr}</p>`;
+      
+      // ⭐️ CORREÇÃO AQUI: Verifica singular/plural para o Ranking
+      const palavraPontuacao = r.pontos === 1 ? 'ponto' : 'pontos';
+      
+      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: ${r.pontos} ${palavraPontuacao} ${tempoStr}</p>`;
     });
 
     document.getElementById("game-area").style.display = "none";
