@@ -128,16 +128,23 @@
   }
   
   /* -------------------------------------- */
-  /* ESTILOS DO MODAL CUSTOMIZADO (NOVO) */
+  /* ESTILOS DOS MODAIS CUSTOMIZADOS */
   /* -------------------------------------- */
-  #player-name-modal {
+  /* NOVO: Apenas o modal de nomes é escondido, o de regras deve aparecer */
+  #player-name-modal { 
+    display: none;
+  }
+  #rules-modal {
+    display: flex; /* Garante que o modal de regras apareça por padrão */
+  }
+
+  #player-name-modal, #rules-modal { 
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Fundo escuro transparente */
-    display: none; /* Começa oculto */
+    background-color: rgba(0, 0, 0, 0.7); 
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -160,6 +167,15 @@
     padding-bottom: 10px;
     text-align: center;
   }
+  
+  #rules-text h3 {
+      color: #3498db;
+      margin-top: 20px;
+  }
+  #rules-text ul {
+      padding-left: 20px;
+  }
+
 
   .player-input-group {
     margin-bottom: 15px;
@@ -180,7 +196,7 @@
     box-sizing: border-box; 
   }
 
-  #submitNames {
+  #submitNames, #closeRules {
     width: 100%;
     padding: 10px;
     background-color: #2ecc71; 
@@ -192,7 +208,7 @@
     transition: background-color 0.2s;
   }
 
-  #submitNames:hover {
+  #submitNames:hover, #closeRules:hover {
     background-color: #27ae60;
   }
 </style>
@@ -226,6 +242,30 @@
 
 <div id="ranking"></div>
 
+<div id="rules-modal">
+  <div class="modal-content">
+    <h2>🏆 Regras do Quiz de Encaixe 🧩</h2>
+    <div id="rules-text">
+      <p>Este é um jogo de encaixe de conceitos. Seu objetivo é arrastar e soltar as peças de Respostas (Azuis) nos slots correspondentes às Perguntas (Descrições).</p>
+      
+      <h3>Como Funciona a Pontuação?</h3>
+      <ul>
+        <li>✅ Você ganha 1 ponto para cada resposta correta.</li>
+        <li>❌ Respostas erradas não geram pontos, mas podem ser corrigidas antes de finalizar a tentativa.</li>
+      </ul>
+      
+      <h3>Modo Multiplayer (Hotseat)</h3>
+      <ul>
+        <li>O jogo funciona com todos os participantes no mesmo dispositivo.</li>
+        <li>Cada jogador tem 5 minutos para preencher a tabela.</li>
+        <li>O Ranking Final é definido pela maior pontuação. Em caso de empate, o jogador com a mesma pontuação, mas que usou menos tempo para completar o turno, fica em posição superior.</li>
+      </ul>
+      
+    </div>
+    <button id="closeRules" onclick="closeRulesAndShowConfig()">Entendi! Começar Jogo</button>
+  </div>
+</div>
+
 <div id="player-name-modal">
   <div class="modal-content">
     <h2>Insira os Nomes dos Jogadores</h2>
@@ -256,14 +296,23 @@
   let currentPlayerIndex = 0;
   let players = [];
   let scores = [];
+  let times = []; 
   let timerInterval;
-  let timeLeft = 300; // 5 minutos
+  let totalTime = 300; 
+  let timeLeft = totalTime; 
   
-  // NOVA VARIÁVEL GLOBAL
   let selectedNumPlayers = 1;
 
+  // Removido o window.onload. O modal de regras aparece via CSS.
+
+  // ⭐️ FUNÇÃO NOVA: Fecha o modal de regras e mostra a configuração inicial
+  function closeRulesAndShowConfig() {
+      document.getElementById("rules-modal").style.display = "none";
+      document.querySelector(".config").style.display = "block"; 
+  }
+
   function updateTitle() {
-    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value); // ATUALIZADO
+    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
     const gameTitle = document.getElementById("game-title");
     if (selectedNumPlayers === 1) {
       gameTitle.textContent = "Quiz de Encaixe - Modo Single Player";
@@ -272,24 +321,23 @@
     }
   }
 
-  // FUNÇÃO STARTGAME MODIFICADA
   function startGame() {
     selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
     
+    // Esconde o painel de configuração para iniciar o jogo ou o modal de nomes
     document.querySelector(".config").style.display = "none";
-    
+
     if (selectedNumPlayers === 1) {
         players = ["Jogador"];
         scores = [0];
+        times = [totalTime];
         document.getElementById("game-area").style.display = "block";
         iniciarRodada();
     } else {
-        // Se for Multiplayer, exibe o modal
         showNameModal(selectedNumPlayers);
     }
   }
 
-  // ⭐️ FUNÇÃO NOVA: Cria e exibe os inputs de nome no modal
   function showNameModal(num) {
       const namesForm = document.getElementById("names-form");
       namesForm.innerHTML = "";
@@ -315,7 +363,6 @@
       document.getElementById("player-name-modal").style.display = "flex";
   }
 
-  // ⭐️ FUNÇÃO NOVA: Coleta os nomes e inicia o jogo
   function submitNames() {
       players = [];
       for (let i = 1; i <= selectedNumPlayers; i++) {
@@ -329,6 +376,7 @@
       }
 
       scores = new Array(selectedNumPlayers).fill(0);
+      times = new Array(selectedNumPlayers).fill(0); // O tempo gasto começa em 0
       
       document.getElementById("player-name-modal").style.display = "none";
       document.getElementById("game-area").style.display = "block";
@@ -388,7 +436,6 @@
     const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === resposta);
 
     if (slot && !slot.dataset.userAnswer) {
-      // NOVO: Adiciona um span para o texto da pergunta e outro para a resposta
       const questionText = document.createElement('span');
       questionText.textContent = slot.dataset.pergunta;
       questionText.classList.add('question-text'); 
@@ -401,7 +448,6 @@
       removeIcon.textContent = 'X';
       removeIcon.classList.add('remove-icon');
       
-      // NOVO: Adiciona um ouvinte de clique APENAS no 'X'
       removeIcon.addEventListener('click', (event) => {
         event.stopPropagation(); 
         removerResposta(slot);
@@ -432,7 +478,6 @@
       piece.draggable = true;
     }
 
-    // NOVO: Restaura o slot apenas com o texto da pergunta
     slot.innerHTML = ''; 
     slot.textContent = slot.dataset.pergunta;
 
@@ -457,7 +502,10 @@
       }
     });
 
+    // Armazena o score e o tempo gasto
     scores[currentPlayerIndex] = acertos;
+    times[currentPlayerIndex] = totalTime - timeLeft; 
+    
     document.getElementById("result").textContent = `Você acertou ${acertos} de ${perguntas.length}!`;
 
     clearInterval(timerInterval);
@@ -466,7 +514,7 @@
 
   function resetTimer() {
     clearInterval(timerInterval);
-    timeLeft = 300;
+    timeLeft = totalTime; 
     updateTimer();
     timerInterval = setInterval(() => {
       timeLeft--;
@@ -498,11 +546,22 @@
     rankingDiv.style.display = "block";
     rankingDiv.innerHTML = "<h2>🏆 Ranking Final</h2>";
 
-    const ranking = players.map((p, i) => ({ nome: p, pontos: scores[i] }))
-      .sort((a, b) => b.pontos - a.pontos);
+    const ranking = players.map((p, i) => ({ 
+        nome: p, 
+        pontos: scores[i], 
+        tempo: times[i] // Tempo gasto
+    }))
+    // Lógica de Ordenação: 1º Pontos (desc), 2º Tempo Gasto (asc)
+    .sort((a, b) => {
+        if (b.pontos !== a.pontos) {
+            return b.pontos - a.pontos; // Maior pontuação primeiro
+        }
+        return a.tempo - b.tempo; // Menor tempo gasto primeiro em caso de empate
+    });
 
     ranking.forEach((r, i) => {
-      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: ${r.pontos} pontos</p>`;
+      const tempoStr = r.tempo > 0 ? `(${r.tempo}s)` : '(Tempo máximo)';
+      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: **${r.pontos} pontos** ${tempoStr}</p>`;
     });
 
     document.getElementById("game-area").style.display = "none";
