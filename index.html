@@ -1,281 +1,286 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jogo Interativo</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #20232a;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 { color: #61dafb; }
-    .config {
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    select, input {
-      padding: 5px;
-      border-radius: 5px;
-      border: none;
-      margin: 5px;
-    }
-    #jogo {
-      display: none;
-      text-align: center;
-      margin-top: 20px;
-    }
-    .caixa {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .dropzone {
-      width: 120px;
-      height: 40px;
-      border: 2px dashed #ccc;
-      border-radius: 5px;
-      line-height: 40px;
-      text-align: center;
-      background-color: #2c2f33;
-    }
-    .opcao {
-      background: #61dafb;
-      color: #000;
-      border-radius: 5px;
-      padding: 8px;
-      cursor: grab;
-      user-select: none;
-    }
-    .opcao.usada {
-      background: gray;
-      cursor: not-allowed;
-    }
-    .certa { background: green !important; color: #fff; }
-    .errada { background: red !important; color: #fff; }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #61dafb;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #timer {
-      font-size: 20px;
-      margin: 10px;
-    }
-    #ranking {
-      margin-top: 30px;
-      display: none;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Quiz de Encaixe</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f3f7;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #2c3e50;
+  }
+
+  .config {
+    margin-bottom: 20px;
+  }
+
+  #game-area {
+    display: none;
+  }
+
+  #shadow-board, #pieces {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .shadow-slot {
+    width: 150px;
+    height: 60px;
+    border: 2px dashed #ccc;
+    background-color: #ecf0f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+
+  .shadow-slot.correct { background-color: #a8e6a3; }
+  .shadow-slot.wrong { background-color: #f5a3a3; }
+
+  .piece {
+    width: 150px;
+    height: 50px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+  }
+
+  .piece.used {
+    background-color: #7f8c8d;
+    cursor: not-allowed;
+  }
+
+  #timer {
+    font-size: 20px;
+    color: #e74c3c;
+    margin: 10px;
+  }
+
+  #result {
+    font-weight: bold;
+    margin-top: 20px;
+    font-size: 18px;
+  }
+
+  #ranking {
+    margin-top: 20px;
+    display: none;
+  }
+
+  .back-button {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background-color: #95a5a6;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+  }
+</style>
 </head>
 <body>
 
-  <h1>Jogo Interativo</h1>
+<a href="#" class="back-button" onclick="location.reload()">← Reiniciar</a>
+<h1>Quiz de Encaixe - Modo Multiplayer</h1>
 
-  <div class="config" id="config">
-    <label>Modo:</label>
-    <select id="modo">
-      <option value="single">Single Player</option>
-      <option value="multi">Multiplayer</option>
-    </select>
-    <div id="nomes"></div>
-    <button onclick="iniciarJogo()">Iniciar Jogo</button>
-  </div>
+<div class="config">
+  <label>Modo de jogo:</label>
+  <select id="numPlayers">
+    <option value="1">Single Player</option>
+    <option value="2">2 Jogadores</option>
+    <option value="3">3 Jogadores</option>
+    <option value="4">4 Jogadores</option>
+  </select>
+  <div id="names"></div>
+  <button onclick="startGame()">Iniciar Jogo</button>
+</div>
 
-  <h2 id="tituloModo">Modo: Single Player</h2>
-  <div id="timer"></div>
+<div id="game-area">
+  <h2 id="currentPlayer"></h2>
+  <div id="timer">Tempo: 5:00</div>
+  <div id="shadow-board"></div>
+  <div id="pieces"></div>
+  <button id="verify" onclick="verificar()">Verificar Respostas</button>
+  <div id="result"></div>
+</div>
 
-  <div id="jogo">
-    <p id="jogadorAtual"></p>
-    <p>Arraste a resposta correta para cada caixa:</p>
-    <div class="caixa">
-      <div class="dropzone" data-resposta="2">2 + 2 = ?</div>
-      <div class="dropzone" data-resposta="5">2 + 3 = ?</div>
-    </div>
+<div id="ranking"></div>
 
-    <div class="caixa" style="margin-top:20px;">
-      <div class="opcao" draggable="true" data-valor="4">4</div>
-      <div class="opcao" draggable="true" data-valor="5">5</div>
-      <div class="opcao" draggable="true" data-valor="6">6</div>
-    </div>
+<script>
+  const perguntas = [
+    { pergunta: "Capital da França", resposta: "Paris" },
+    { pergunta: "Maior planeta do Sistema Solar", resposta: "Júpiter" },
+    { pergunta: "Metal usado em fios elétricos", resposta: "Cobre" },
+    { pergunta: "Animal símbolo da Austrália", resposta: "Canguru" },
+    { pergunta: "Cor do céu em um dia claro", resposta: "Azul" },
+    { pergunta: "Planeta vermelho", resposta: "Marte" },
+    { pergunta: "Maior oceano do mundo", resposta: "Pacífico" },
+    { pergunta: "Animal que mia", resposta: "Gato" },
+    { pergunta: "Animal que late", resposta: "Cachorro" },
+    { pergunta: "Principal gás da atmosfera", resposta: "Nitrogênio" },
+    { pergunta: "Líquido essencial à vida", resposta: "Água" },
+    { pergunta: "Instrumento com 6 cordas", resposta: "Violão" },
+    { pergunta: "Continente do Egito", resposta: "África" },
+    { pergunta: "Objeto usado para escrever", resposta: "Caneta" },
+    { pergunta: "Combustível dos carros", resposta: "Gasolina" }
+  ];
 
-    <button id="verificar">Finalizar Tentativa</button>
-  </div>
+  let currentPlayerIndex = 0;
+  let players = [];
+  let scores = [];
+  let timerInterval;
+  let timeLeft = 300; // 5 minutos
 
-  <div id="ranking">
-    <h2>Ranking Final</h2>
-    <ol id="listaRanking"></ol>
-  </div>
+  function startGame() {
+    const numPlayers = parseInt(document.getElementById("numPlayers").value);
+    const namesDiv = document.getElementById("names");
+    players = [];
+    scores = new Array(numPlayers).fill(0);
 
-  <script>
-    const modoSelect = document.getElementById("modo");
-    const nomesDiv = document.getElementById("nomes");
-    const jogoDiv = document.getElementById("jogo");
-    const timerDiv = document.getElementById("timer");
-    const jogadorAtualP = document.getElementById("jogadorAtual");
-    const rankingDiv = document.getElementById("ranking");
-    const listaRanking = document.getElementById("listaRanking");
-    const verificarBtn = document.getElementById("verificar");
-    const tituloModo = document.getElementById("tituloModo");
+    // coleta nomes
+    for (let i = 1; i <= numPlayers; i++) {
+      const name = prompt(`Nome do Jogador ${i}:`) || `Jogador ${i}`;
+      players.push(name);
+    }
 
-    let jogadores = [];
-    let pontuacoes = [];
-    let jogadorAtual = 0;
-    let tempo = 300; // 5 minutos = 300 segundos
-    let timer;
+    document.querySelector(".config").style.display = "none";
+    document.getElementById("game-area").style.display = "block";
+    iniciarRodada();
+  }
 
-    // muda o título ao trocar o modo
-    modoSelect.addEventListener("change", function() {
-      tituloModo.textContent = this.value === "single" 
-        ? "Modo: Single Player" 
-        : "Modo: Multiplayer";
-      nomesDiv.innerHTML = "";
+  function iniciarRodada() {
+    document.getElementById("result").textContent = "";
+    const currentPlayer = players[currentPlayerIndex];
+    document.getElementById("currentPlayer").textContent = `Vez de: ${currentPlayer}`;
+    gerarPerguntas();
+    resetTimer();
+  }
 
-      if (this.value === "multi") {
-        for (let i = 1; i <= 4; i++) {
-          nomesDiv.innerHTML += `<div><input type="text" id="nome${i}" placeholder="Nome do jogador ${i}"></div>`;
+  function gerarPerguntas() {
+    const shadowBoard = document.getElementById("shadow-board");
+    const pieces = document.getElementById("pieces");
+    shadowBoard.innerHTML = "";
+    pieces.innerHTML = "";
+
+    perguntas.forEach((p, i) => {
+      const slot = document.createElement("div");
+      slot.className = "shadow-slot";
+      slot.dataset.resposta = p.resposta;
+      slot.textContent = p.pergunta;
+      slot.addEventListener("dragover", e => e.preventDefault());
+      slot.addEventListener("drop", soltar);
+      shadowBoard.appendChild(slot);
+    });
+
+    const respostasEmbaralhadas = [...perguntas]
+      .sort(() => Math.random() - 0.5)
+      .map(p => p.resposta);
+
+    respostasEmbaralhadas.forEach(resp => {
+      const piece = document.createElement("div");
+      piece.className = "piece";
+      piece.textContent = resp;
+      piece.draggable = true;
+      piece.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text", resp);
+      });
+      pieces.appendChild(piece);
+    });
+  }
+
+  function soltar(e) {
+    const resposta = e.dataTransfer.getData("text");
+    const slot = e.target;
+    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === resposta);
+
+    if (!slot.textContent.includes("→")) {
+      slot.textContent += ` → ${resposta}`;
+      slot.dataset.userAnswer = resposta;
+      piece.classList.add("used");
+      piece.draggable = false;
+    }
+  }
+
+  function verificar() {
+    let acertos = 0;
+    document.querySelectorAll(".shadow-slot").forEach(slot => {
+      const correta = slot.dataset.resposta;
+      const resposta = slot.dataset.userAnswer;
+      slot.classList.remove("correct", "wrong");
+      if (resposta) {
+        if (resposta === correta) {
+          acertos++;
+          slot.classList.add("correct");
+        } else {
+          slot.classList.add("wrong");
         }
       }
     });
 
-    function iniciarJogo() {
-      if (modoSelect.value === "multi") {
-        jogadores = [];
-        for (let i = 1; i <= 4; i++) {
-          const nome = document.getElementById("nome" + i).value.trim();
-          if (nome) jogadores.push(nome);
-        }
-        if (jogadores.length === 0) {
-          alert("Insira ao menos um nome!");
-          return;
-        }
-      } else {
-        jogadores = ["Jogador Único"];
-      }
+    scores[currentPlayerIndex] = acertos;
+    document.getElementById("result").textContent = `Você acertou ${acertos} de ${perguntas.length}!`;
 
-      pontuacoes = new Array(jogadores.length).fill(0);
-      jogadorAtual = 0;
-      rankingDiv.style.display = "none";
-      document.getElementById("config").style.display = "none";
-      jogoDiv.style.display = "block";
+    clearInterval(timerInterval);
+    setTimeout(proximaRodada, 4000);
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    timeLeft = 300;
+    updateTimer();
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        verificar();
+      }
+    }, 1000);
+  }
+
+  function updateTimer() {
+    const min = Math.floor(timeLeft / 60);
+    const sec = String(timeLeft % 60).padStart(2, "0");
+    document.getElementById("timer").textContent = `Tempo: ${min}:${sec}`;
+  }
+
+  function proximaRodada() {
+    currentPlayerIndex++;
+    if (currentPlayerIndex < players.length) {
       iniciarRodada();
+    } else {
+      mostrarRanking();
     }
+  }
 
-    function iniciarRodada() {
-      tempo = 300;
-      jogadorAtualP.textContent = "Vez de: " + jogadores[jogadorAtual];
-      iniciarTimer();
-      resetarRespostas();
-    }
+  function mostrarRanking() {
+    const rankingDiv = document.getElementById("ranking");
+    rankingDiv.style.display = "block";
+    rankingDiv.innerHTML = "<h2>🏆 Ranking Final</h2>";
 
-    function iniciarTimer() {
-      clearInterval(timer);
-      atualizarTimer();
-      timer = setInterval(() => {
-        tempo--;
-        atualizarTimer();
-        if (tempo <= 0) {
-          clearInterval(timer);
-          finalizarRodada();
-        }
-      }, 1000);
-    }
+    const ranking = players.map((p, i) => ({ nome: p, pontos: scores[i] }))
+      .sort((a, b) => b.pontos - a.pontos);
 
-    function atualizarTimer() {
-      const minutos = Math.floor(tempo / 60);
-      const segundos = tempo % 60;
-      timerDiv.textContent = `Tempo restante: ${minutos}:${segundos.toString().padStart(2, '0')}`;
-    }
+    ranking.forEach((r, i) => {
+      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: ${r.pontos} pontos</p>`;
+    });
 
-    function resetarRespostas() {
-      document.querySelectorAll(".dropzone").forEach(z => z.textContent = z.dataset.resposta + " + ?");
-      document.querySelectorAll(".opcao").forEach(o => {
-        o.classList.remove("usada", "certa", "errada");
-        o.draggable = true;
-      });
-      addDragEvents();
-    }
-
-    function addDragEvents() {
-      const opcoes = document.querySelectorAll(".opcao");
-      const zonas = document.querySelectorAll(".dropzone");
-
-      opcoes.forEach(o => {
-        o.addEventListener("dragstart", e => {
-          if (o.classList.contains("usada")) e.preventDefault();
-          else e.dataTransfer.setData("text", o.dataset.valor);
-        });
-      });
-
-      zonas.forEach(z => {
-        z.addEventListener("dragover", e => e.preventDefault());
-        z.addEventListener("drop", e => {
-          e.preventDefault();
-          const valor = e.dataTransfer.getData("text");
-          const opcao = document.querySelector(`.opcao[data-valor="${valor}"]`);
-          if (!z.dataset.colocada) {
-            z.textContent = z.dataset.resposta + " = " + valor;
-            opcao.classList.add("usada");
-            opcao.draggable = false;
-            z.dataset.colocada = valor;
-          }
-        });
-      });
-    }
-
-    function verificarRespostas() {
-      let pontos = 0;
-      document.querySelectorAll(".dropzone").forEach(z => {
-        const valor = z.dataset.colocada;
-        if (valor) {
-          if (valor === z.dataset.resposta) {
-            z.classList.add("certa");
-            pontos++;
-          } else {
-            z.classList.add("errada");
-          }
-        }
-      });
-      pontuacoes[jogadorAtual] += pontos;
-      clearInterval(timer);
-      finalizarRodada();
-    }
-
-    function finalizarRodada() {
-      jogadorAtual++;
-      if (jogadorAtual < jogadores.length) {
-        iniciarRodada();
-      } else {
-        exibirRanking();
-      }
-    }
-
-    function exibirRanking() {
-      jogoDiv.style.display = "none";
-      rankingDiv.style.display = "block";
-      listaRanking.innerHTML = "";
-      jogadores.forEach((j, i) => {
-        const li = document.createElement("li");
-        li.textContent = `${j}: ${pontuacoes[i]} ponto(s)`;
-        listaRanking.appendChild(li);
-      });
-    }
-
-    verificarBtn.addEventListener("click", verificarRespostas);
-    addDragEvents();
-  </script>
+    document.getElementById("game-area").style.display = "none";
+  }
+</script>
 
 </body>
 </html>
