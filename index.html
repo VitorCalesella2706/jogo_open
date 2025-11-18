@@ -21,7 +21,6 @@
     background-attachment: fixed;
   }
 
-  /* Melhorar leitura do título */
   h1 {
      background-color: rgba(255, 255, 255, 0.95);
      display: inline-block;
@@ -61,7 +60,7 @@
     padding: 30px;
     border-radius: 10px;
     display: inline-block;
-    max-width: 800px; /* Limita a largura para o texto não ficar muito esticado */
+    max-width: 800px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   }
   
@@ -223,7 +222,7 @@
 
   /* MODAIS */
   #player-name-modal, #rules-modal { 
-    display: none;
+    display: none; /* Agora começa escondido */
     position: fixed;
     top: 0;
     left: 0;
@@ -234,7 +233,9 @@
     align-items: center;
     z-index: 3000;
   }
-  #rules-modal { display: flex; }
+  
+  /* As regras só aparecem depois */
+  /* #rules-modal { display: flex; } <- REMOVIDO */
 
   .modal-content {
     background-color: #ecf0f1;
@@ -321,7 +322,7 @@
       <li><strong>Pontuação:</strong> +1 ponto por acerto.</li>
       <li>O ranking é definido por quem acerta mais em menos tempo.</li>
     </ul>
-    <button onclick="fecharRegras()" style="width:100%; padding:10px; background:#2ecc71; color:white; border:none; border-radius:5px; cursor:pointer; font-size:1.1em;">Entendi</button>
+    <button onclick="confirmarRegrasEIniciar()" style="width:100%; padding:10px; background:#2ecc71; color:white; border:none; border-radius:5px; cursor:pointer; font-size:1.1em;">Entendi, Vamos Jogar!</button>
   </div>
 </div>
 
@@ -329,7 +330,7 @@
   <div class="modal-content">
     <h2 style="text-align:center">Jogadores</h2>
     <div id="names-form"></div>
-    <button onclick="iniciarComNomes()" style="width:100%; padding:10px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:15px;">Começar</button>
+    <button onclick="salvarNomesEMostrarRegras()" style="width:100%; padding:10px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:15px;">Próximo ➡</button>
   </div>
 </div>
 
@@ -363,8 +364,6 @@
   let timerInterval;
 
   /* ================= FUNÇÕES GERAIS ================= */
-  function fecharRegras() { document.getElementById('rules-modal').style.display = 'none'; }
-
   function alternarSom() {
     const audio = document.getElementById('musica-fundo');
     const btn = document.getElementById('btn-som');
@@ -382,6 +381,9 @@
 
   function ativarFundoAnimado() { document.body.classList.add('fundo-animado'); }
 
+  /* ================= FLUXO DE INÍCIO ================= */
+  
+  // 1. Clicou em "Iniciar Jogo" na tela inicial
   function prepararJogo() {
     // Tenta som
     const audio = document.getElementById('musica-fundo');
@@ -392,10 +394,14 @@
     }).catch(() => {});
 
     const qtd = parseInt(document.getElementById('numPlayers').value);
+    
     if (qtd === 1) {
+      // Single Player: Define nome e vai direto para as Regras
       players = ["Jogador 1"];
-      iniciarPartidaReal();
+      document.getElementById('config-screen').style.display = 'none';
+      document.getElementById('rules-modal').style.display = 'flex'; // Mostra Regras
     } else {
+      // Multiplayer: Abre modal de nomes
       document.getElementById('config-screen').style.display = 'none';
       const form = document.getElementById('names-form');
       form.innerHTML = '';
@@ -406,7 +412,8 @@
     }
   }
 
-  function iniciarComNomes() {
+  // 2. (Multiplayer) Clicou em "Próximo" após digitar nomes
+  function salvarNomesEMostrarRegras() {
     const qtd = parseInt(document.getElementById('numPlayers').value);
     players = [];
     for(let i=1; i<=qtd; i++){
@@ -414,13 +421,18 @@
       players.push(nome || `Jogador ${i}`);
     }
     document.getElementById('player-name-modal').style.display = 'none';
+    document.getElementById('rules-modal').style.display = 'flex'; // Mostra Regras
+  }
+
+  // 3. Clicou em "Entendi" nas Regras -> O JOGO COMEÇA
+  function confirmarRegrasEIniciar() {
+    document.getElementById('rules-modal').style.display = 'none';
     iniciarPartidaReal();
   }
 
   function iniciarPartidaReal() {
-    document.getElementById('config-screen').style.display = 'none';
     document.getElementById('game-area').style.display = 'block';
-    ativarFundoAnimado();
+    ativarFundoAnimado(); // Ativa o GIF só agora
     
     scores = new Array(players.length).fill(0);
     times = new Array(players.length).fill(0);
@@ -546,7 +558,6 @@
         acertos++;
       } else {
         erros++;
-        // Prepara o gabarito visual dos erros
         const respExibida = usuario ? usuario : "<span style='color:#e74c3c'>(Sem resposta)</span>";
         htmlGabarito += `
           <div class="gabarito-row erro">
@@ -561,23 +572,19 @@
       }
     });
 
-    // Salva Pontuação e Tempo
     const tempoGasto = totalTime - timeLeft;
     scores[currentPlayerIndex] = acertos;
     times[currentPlayerIndex] = tempoGasto;
 
-    // Troca a visualização para o Resultado
     document.getElementById('game-play-container').style.display = 'none';
     const resContainer = document.getElementById('result-container');
     resContainer.style.display = 'block';
 
-    // Cabeçalho
     document.getElementById('score-header').innerHTML = `
         <h3>Você acertou ${acertos} de ${perguntas.length}</h3>
         <p>Tempo: <strong>${tempoGasto}s</strong></p>
     `;
     
-    // Lista de Erros
     const divLista = document.getElementById('gabarito-lista');
     if(erros === 0) {
       divLista.innerHTML = '<div class="gabarito-row acerto" style="justify-content:center; font-weight:bold;">🎉 PARABÉNS! VOCÊ GABARITOU! 🎉</div>';
@@ -585,7 +592,6 @@
       divLista.innerHTML = '<h4 style="margin-top:0">Onde você errou:</h4>' + htmlGabarito;
     }
     
-    // Botão Continuar
     const btnCont = document.getElementById('btn-continuar');
     if(currentPlayerIndex < players.length - 1) {
       btnCont.textContent = `Próximo Jogador (${players[currentPlayerIndex+1]}) ➡`;
@@ -612,7 +618,6 @@
       return { nome: nome, pontos: scores[i], tempo: times[i] };
     });
 
-    // Ordena: Mais Pontos > Menor Tempo
     dadosRanking.sort((a, b) => {
       if(b.pontos !== a.pontos) return b.pontos - a.pontos;
       return a.tempo - b.tempo;
