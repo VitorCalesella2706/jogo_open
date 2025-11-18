@@ -5,40 +5,42 @@
 <title>Quiz de Encaixe</title>
 <style>
   body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f0f3f7;
     text-align: center;
     padding: 20px;
     transition: background 0.5s ease;
-    /* Padding extra no final para caber o gabarito */
-    padding-bottom: 100px; 
+    padding-bottom: 100px; /* Espaço extra para rolagem */
   }
 
-  /* 🌟 Fundo com GIF */
+  /* 🌟 Fundo Animado (Ativado via JS) */
   body.fundo-animado {
     background-image: url('imagem.gif');
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
     background-attachment: fixed;
   }
 
-  /* Sombra nos textos para leitura sobre o GIF */
-  h1, h2, #timer {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); 
-  }
-  
+  /* Estilos para leitura em cima do GIF */
   h1 {
-     background-color: rgba(255, 255, 255, 0.8);
+     background-color: rgba(255, 255, 255, 0.9);
      display: inline-block;
-     padding: 10px 20px;
+     padding: 10px 25px;
      border-radius: 10px;
-     text-shadow: none; /* Remove sombra dentro do box branco */
      color: #2c3e50;
+     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
 
-  .config { margin-bottom: 20px; }
-  #game-area { display: none; }
+  h2 {
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+  }
+  
+  /* Quando dentro de caixas brancas, remove sombra e ajusta cor */
+  .modal-content h2, #result-container h2, #ranking h2 {
+    color: #2c3e50;
+    text-shadow: none;
+  }
 
   /* --- 🔊 BOTÃO DE SOM --- */
   #btn-som {
@@ -49,18 +51,28 @@
     font-size: 16px;
     font-weight: bold;
     color: white;
-    background-color: #e74c3c;
+    background-color: #e74c3c; /* Vermelho = mudo */
     border: none;
     border-radius: 50px;
     cursor: pointer;
     z-index: 2000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
   }
-  #btn-som.tocando { background-color: #2ecc71; }
   #btn-som:hover { transform: scale(1.05); }
+  #btn-som.tocando { background-color: #2ecc71; } /* Verde = tocando */
 
-  /* --- 🧩 ÁREA DO JOGO --- */
+  .config { 
+    margin-bottom: 20px; 
+    background: rgba(255,255,255,0.9);
+    padding: 20px;
+    border-radius: 10px;
+    display: inline-block;
+  }
+  
+  #game-area { display: none; }
+
+  /* --- 🧩 TABULEIRO --- */
   #shadow-board, #pieces {
     display: flex;
     flex-wrap: wrap;
@@ -70,49 +82,53 @@
   }
 
   .shadow-slot {
-    width: 250px; 
-    height: 60px;
+    width: 260px; 
+    min-height: 70px; /* Um pouco maior para caber texto */
     border: 2px dashed #555;
-    background-color: rgba(236, 240, 241, 0.95);
+    background-color: rgba(240, 240, 240, 0.95);
     display: flex;
+    flex-direction: column; /* Organiza texto e resposta verticalmente */
     align-items: center;
     justify-content: center;
     border-radius: 8px;
     position: relative; 
-    padding-right: 25px; 
-    padding-left: 5px; 
-    text-align: left; 
-    font-size: 0.85em; 
+    padding: 10px;
+    text-align: center; 
+    font-size: 0.9em; 
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   }
 
+  /* Botão X para remover */
   .remove-icon {
     position: absolute;
+    top: 5px;
     right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
     cursor: pointer;
     font-weight: bold;
     color: #e74c3c; 
-    font-size: 1.2em;
-    padding: 0 5px;
+    background: #fff;
     border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    display: none; /* Escondido até ter resposta */
   }
-  
-  .shadow-slot span {
-      display: inline-block;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: normal;
-      line-height: 1.2;
+
+  .resposta-encaixada {
+    margin-top: 5px;
+    color: #2980b9;
+    font-weight: bold;
+    background: #dff9fb;
+    padding: 4px 8px;
+    border-radius: 4px;
+    width: 90%;
   }
 
   .shadow-slot.correct { background-color: #a8e6a3; border-color: #27ae60; }
   .shadow-slot.wrong { background-color: #f5a3a3; border-color: #c0392b; }
 
   .piece {
-    width: 150px; 
+    width: 160px; 
     height: 50px;
     background-color: #3498db;
     color: white;
@@ -124,10 +140,12 @@
     font-size: 0.9em; 
     box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     border: 1px solid #2980b9;
+    user-select: none;
   }
 
   .piece.used {
-    background-color: #7f8c8d;
+    background-color: #95a5a6;
+    opacity: 0.6;
     cursor: not-allowed;
     box-shadow: none;
   }
@@ -136,83 +154,68 @@
     font-size: 24px;
     color: #fff;
     background-color: #e74c3c;
-    padding: 5px 15px;
+    padding: 8px 20px;
     border-radius: 20px;
     display: inline-block;
     margin: 10px;
     font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   }
 
-  /* --- 📝 RESULTADO E GABARITO --- */
+  /* --- 📝 RESULTADO E GABARITO (Aparece no final) --- */
   #result-container {
-    display: none; /* Escondido inicialmente */
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 20px;
+    display: none; /* Começa oculto */
+    background-color: rgba(255, 255, 255, 0.98);
+    padding: 25px;
     border-radius: 10px;
-    max-width: 600px;
+    max-width: 700px;
     margin: 20px auto;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     text-align: left;
+    border: 1px solid #ddd;
   }
 
-  #result-score {
-    font-size: 1.4em;
-    font-weight: bold;
+  #score-header {
     text-align: center;
-    color: #2c3e50;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #ccc;
-    padding-bottom: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #ecf0f1;
   }
 
-  .gabarito-item {
-    margin-bottom: 12px;
+  .gabarito-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 10px;
-    background-color: #fff0f0;
-    border-left: 5px solid #e74c3c;
-    border-radius: 4px;
-    font-size: 0.95em;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    background-color: #fff;
+    border-left: 5px solid #ccc;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
 
-  .gabarito-pergunta {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-  }
+  .gabarito-row.erro { border-left-color: #e74c3c; background-color: #fdeaea; }
+  .gabarito-row.acerto { border-left-color: #27ae60; background-color: #eafaf1; }
 
-  .gabarito-errada { color: #c0392b; text-decoration: line-through; margin-right: 10px; }
-  .gabarito-correta { color: #27ae60; font-weight: bold; }
-
+  .gabarito-texto { flex: 1; padding-right: 10px; }
+  .gabarito-label { font-weight: bold; display: block; font-size: 0.85em; color: #7f8c8d; }
+  
   #btn-continuar {
     display: block;
     width: 100%;
-    margin-top: 20px;
-    padding: 12px;
-    background-color: #3498db;
+    padding: 15px;
+    background-color: #27ae60;
     color: white;
     border: none;
-    border-radius: 6px;
-    font-size: 1.1em;
+    border-radius: 8px;
+    font-size: 1.2em;
     cursor: pointer;
+    margin-top: 20px;
     font-weight: bold;
   }
-  #btn-continuar:hover { background-color: #2980b9; }
-  /* --------------------------- */
+  #btn-continuar:hover { background-color: #219150; }
 
-  #ranking {
-    margin-top: 20px;
-    display: none;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .rank-highlight { font-weight: bold; }
-
+  /* Botão Voltar */
   .back-button {
     position: fixed;
     top: 15px;
@@ -223,14 +226,11 @@
     border-radius: 6px;
     text-decoration: none;
     z-index: 1500;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
-  /* Modais */
-  #player-name-modal { display: none; }
-  #rules-modal { display: flex; }
-
+  /* MODAIS */
   #player-name-modal, #rules-modal { 
+    display: none; /* Controlado via JS */
     position: fixed;
     top: 0;
     left: 0;
@@ -239,77 +239,81 @@
     background-color: rgba(0, 0, 0, 0.85);
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 3000;
   }
+  #rules-modal { display: flex; } /* Regras aparecem primeiro */
 
   .modal-content {
     background-color: #ecf0f1;
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    width: 80%;
-    max-width: 400px;
+    width: 90%;
+    max-width: 450px;
     text-align: left;
   }
   
-  .modal-content h2 { text-align: center; border-bottom: 2px solid #bdc3c7; padding-bottom: 10px; margin-top: 0; color: #2c3e50; }
-  
-  .player-input-group { margin-bottom: 15px; }
-  .player-input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #34495e; }
-  .player-input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+  .player-input-group { margin-bottom: 10px; }
+  .player-input-group input { width: 100%; padding: 8px; margin-top: 5px; }
 
-  #submitNames, #closeRules {
-    width: 100%;
-    padding: 10px;
-    background-color: #2ecc71; 
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1.1em;
-    cursor: pointer;
+  /* RANKING */
+  #ranking {
+    display: none;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 500px;
+    margin: 50px auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
-  #submitNames:hover, #closeRules:hover { background-color: #27ae60; }
 </style>
 </head>
 <body>
 
 <audio id="musica-fundo" loop>
     <source src="dark.mp4" type="audio/mp4">
+    Seu navegador não suporta áudio.
 </audio>
 
 <button id="btn-som" onclick="alternarSom()">🔇 Som Desligado</button>
 
 <a href="#" class="back-button" onclick="location.reload()">← Reiniciar</a>
 
-<h1 id="game-title">Quiz de Encaixe - Modo Single Player</h1>
+<h1 id="game-title">Quiz de Encaixe</h1>
 
-<div class="config">
-  <label style="background: rgba(255,255,255,0.8); padding: 5px; border-radius: 4px;">Modo de jogo:</label>
-  <select id="numPlayers" onchange="updateTitle()">
+<div class="config" id="config-screen">
+  <label><strong>Número de Jogadores:</strong></label>
+  <select id="numPlayers" style="padding: 5px; margin: 10px;">
     <option value="1">Single Player</option>
     <option value="2">2 Jogadores</option>
     <option value="3">3 Jogadores</option>
     <option value="4">4 Jogadores</option>
   </select>
   <div id="names"></div>
-  <br><br>
-  <button onclick="startGame()" style="padding: 10px 20px; font-size: 1.2em; cursor: pointer;">Iniciar Jogo</button>
+  <br>
+  <button onclick="prepararJogo()" style="padding: 10px 25px; font-size: 1.1em; background-color:#2980b9; color:white; border:none; border-radius:5px; cursor:pointer;">Iniciar Jogo</button>
 </div>
 
 <div id="game-area">
-  <h2 id="currentPlayer" style="background: rgba(255,255,255,0.8); display:inline-block; padding: 5px 15px; border-radius: 10px;"></h2>
+  <h2 id="currentPlayerName" style="background:rgba(0,0,0,0.5); padding:5px 15px; border-radius:20px; display:inline-block;"></h2>
   <br>
-  <div id="timer">Tempo: 5:00</div>
-  
-  <div id="shadow-board"></div>
-  <div id="pieces"></div>
-  
-  <button id="verify" onclick="verificar()" style="padding: 10px 20px; font-size: 1.1em; cursor: pointer; background-color: #f1c40f; border: none; border-radius: 5px; color: #000; font-weight: bold;">Finalizar Tentativa</button>
-  
+  <div id="timer">05:00</div>
+
+  <div id="game-play-container">
+    <div id="shadow-board"></div>
+    <div id="pieces"></div>
+    <br>
+    <button id="verify-btn" onclick="verificar()" style="padding: 12px 30px; font-size: 1.2em; background-color: #f1c40f; border: none; border-radius: 5px; color: #000; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #d35400;">
+      Finalizar Tentativa
+    </button>
+  </div>
+
   <div id="result-container">
-      <div id="result-score"></div>
-      <div id="gabarito-lista"></div>
-      <button id="btn-continuar" onclick="proximaRodada()">Continuar / Próximo Jogador</button>
+    <div id="score-header">
+        </div>
+    <div id="gabarito-lista">
+        </div>
+    <button id="btn-continuar" onclick="avancarProximoJogador()">Continuar ➡</button>
   </div>
 </div>
 
@@ -317,48 +321,29 @@
 
 <div id="rules-modal">
   <div class="modal-content">
-    <h2>🏆 Regras do Quiz de Encaixe 🧩</h2>
-    <div id="rules-text">
-      <p>Este é um jogo de encaixe de conceitos...</p>
-      <h3>Como Funciona a Pontuação?</h3>
-      <ul>
-        <li>1 ponto por resposta correta.</li>
-        <li><strong>Penalidade:</strong> +4 segundos no tempo final por erro!</li>
-      </ul>
-    </div>
-    <button id="closeRules" onclick="closeRulesAndShowConfig()">Entendi! Começar Jogo</button>
+    <h2 style="text-align:center">📜 Regras</h2>
+    <ul>
+      <li>Arraste a resposta azul para a caixa cinza correspondente.</li>
+      <li><strong>Pontuação:</strong> +1 ponto por acerto.</li>
+      <li><strong>Penalidade:</strong> +4 segundos no tempo final por cada erro!</li>
+      <li>Vence quem acertar mais em menos tempo.</li>
+    </ul>
+    <button onclick="fecharRegras()" style="width:100%; padding:10px; background:#2ecc71; color:white; border:none; border-radius:5px; cursor:pointer; font-size:1.1em;">Entendi</button>
   </div>
 </div>
 
 <div id="player-name-modal">
   <div class="modal-content">
-    <h2>Insira os Nomes dos Jogadores</h2>
+    <h2 style="text-align:center">Jogadores</h2>
     <div id="names-form"></div>
-    <button id="submitNames" onclick="submitNames()">Começar o Quiz</button>
+    <button onclick="iniciarComNomes()" style="width:100%; padding:10px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:15px;">Começar</button>
   </div>
 </div>
 
 <script>
-  /* --- 🔊 SOM --- */
-  function alternarSom() {
-    const audio = document.getElementById('musica-fundo');
-    const botao = document.getElementById('btn-som');
-    if (audio.paused) {
-      audio.play().then(() => {
-        botao.innerHTML = "🔊 Som Ligado";
-        botao.classList.add("tocando");
-      }).catch(e => alert("Erro ao tocar áudio."));
-    } else {
-      audio.pause();
-      botao.innerHTML = "🔇 Som Desligado";
-      botao.classList.remove("tocando");
-    }
-  }
-
-  /* --- 🖼️ FUNDO --- */
-  function ativarFundo() { document.body.classList.add('fundo-animado'); }
-
-  /* --- DADOS DO JOGO --- */
+  /* ==========================================
+     CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
+     ========================================== */
   const perguntas = [
     { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
     { pergunta: "Corrente elétrica deposita camada metálica sobre a superfície.", resposta: "Eletrodeposição" },
@@ -377,263 +362,354 @@
     { pergunta: "Forma óxidos protetores na superfície metálica.", resposta: "Oxidação térmica" }
   ];
 
-  let currentPlayerIndex = 0;
   let players = [];
+  let currentPlayerIndex = 0;
   let scores = [];
-  let times = []; 
+  let finalTimes = []; // Tempo total (gasto + penalidade)
+  
+  let totalTime = 300; // 5 minutos
+  let timeLeft = 300;
   let timerInterval;
-  let totalTime = 300; 
-  let timeLeft = totalTime; 
-  let selectedNumPlayers = 1;
 
-  function closeRulesAndShowConfig() {
-      document.getElementById("rules-modal").style.display = "none";
-      document.querySelector(".config").style.display = "block"; 
+  /* ==========================================
+     CONTROLE DE ÁUDIO E INTERFACE
+     ========================================== */
+  function fecharRegras() {
+    document.getElementById('rules-modal').style.display = 'none';
   }
 
-  function startGame() {
+  function alternarSom() {
     const audio = document.getElementById('musica-fundo');
-    const botao = document.getElementById('btn-som');
-    audio.play().then(() => {
-       botao.innerHTML = "🔊 Som Ligado";
-       botao.classList.add("tocando");
-    }).catch(() => {});
-
-    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
+    const btn = document.getElementById('btn-som');
     
-    if (selectedNumPlayers === 1) {
-        ativarFundo(); 
-        players = ["Jogador"];
-        scores = [0];
-        times = [0];
-        document.querySelector(".config").style.display = "none";
-        document.getElementById("game-area").style.display = "block";
-        iniciarRodada();
+    if (audio.paused) {
+      audio.play().then(() => {
+        btn.innerHTML = "🔊 Som Ligado";
+        btn.classList.add('tocando');
+      }).catch(err => {
+        console.error(err);
+        alert("Não foi possível reproduzir 'dark.mp4'. Verifique se o arquivo está na pasta.");
+      });
     } else {
-        document.querySelector(".config").style.display = "none";
-        showNameModal(selectedNumPlayers);
+      audio.pause();
+      btn.innerHTML = "🔇 Som Desligado";
+      btn.classList.remove('tocando');
     }
   }
 
-  function updateTitle() {
-    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
-    const t = document.getElementById("game-title");
-    t.textContent = selectedNumPlayers === 1 ? "Quiz de Encaixe - Modo Single Player" : "Quiz de Encaixe - Modo Multiplayer";
+  function ativarFundoAnimado() {
+    document.body.classList.add('fundo-animado');
   }
 
-  function showNameModal(num) {
-      const form = document.getElementById("names-form");
-      form.innerHTML = "";
-      for (let i = 1; i <= num; i++) {
-          const d = document.createElement('div');
-          d.className = 'player-input-group';
-          d.innerHTML = `<label>Nome Jogador ${i}:</label><input type="text" id="player${i}" placeholder="Nome Jogador ${i}">`;
-          form.appendChild(d);
+  /* ==========================================
+     LÓGICA DE INÍCIO DE JOGO
+     ========================================== */
+  function prepararJogo() {
+    // Tenta tocar música automaticamente
+    const audio = document.getElementById('musica-fundo');
+    const btn = document.getElementById('btn-som');
+    audio.play().then(() => {
+       btn.innerHTML = "🔊 Som Ligado";
+       btn.classList.add('tocando');
+    }).catch(() => console.log("Autoplay bloqueado, aguardando clique do usuário."));
+
+    const qtd = parseInt(document.getElementById('numPlayers').value);
+    
+    if (qtd === 1) {
+      players = ["Jogador 1"];
+      iniciarPartidaReal();
+    } else {
+      // Abre modal de nomes
+      document.getElementById('config-screen').style.display = 'none';
+      const form = document.getElementById('names-form');
+      form.innerHTML = '';
+      for(let i=1; i<=qtd; i++){
+        form.innerHTML += `<div class="player-input-group"><label>Jogador ${i}:</label><input type="text" id="p${i}" placeholder="Nome"></div>`;
       }
-      document.getElementById("player-name-modal").style.display = "flex";
+      document.getElementById('player-name-modal').style.display = 'flex';
+    }
   }
 
-  function submitNames() {
-      players = [];
-      for (let i = 1; i <= selectedNumPlayers; i++) {
-          let val = document.getElementById(`player${i}`).value.trim();
-          players.push(val === "" ? `Jogador ${i}` : val);
+  function iniciarComNomes() {
+    const qtd = parseInt(document.getElementById('numPlayers').value);
+    players = [];
+    for(let i=1; i<=qtd; i++){
+      let nome = document.getElementById(`p${i}`).value.trim();
+      players.push(nome || `Jogador ${i}`);
+    }
+    document.getElementById('player-name-modal').style.display = 'none';
+    iniciarPartidaReal();
+  }
+
+  function iniciarPartidaReal() {
+    // Esconde config, mostra jogo, ativa fundo
+    document.getElementById('config-screen').style.display = 'none';
+    document.getElementById('game-area').style.display = 'block';
+    ativarFundoAnimado();
+    
+    // Inicializa arrays de pontuação
+    scores = new Array(players.length).fill(0);
+    finalTimes = new Array(players.length).fill(0);
+    
+    currentPlayerIndex = 0;
+    carregarRodada();
+  }
+
+  /* ==========================================
+     LÓGICA DA RODADA
+     ========================================== */
+  function carregarRodada() {
+    // 1. Reseta Interface
+    document.getElementById('result-container').style.display = 'none';
+    document.getElementById('game-play-container').style.display = 'block';
+    
+    // 2. Atualiza Info do Jogador
+    const nome = players[currentPlayerIndex];
+    document.getElementById('currentPlayerName').textContent = `Vez de: ${nome}`;
+    
+    // 3. Gera Tabuleiro e Peças
+    gerarElementos();
+    
+    // 4. Inicia Timer
+    timeLeft = totalTime;
+    atualizarDisplayTimer();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      atualizarDisplayTimer();
+      if(timeLeft <= 0) {
+        clearInterval(timerInterval);
+        verificar(); // Acabou o tempo
       }
-      scores = new Array(selectedNumPlayers).fill(0);
-      times = new Array(selectedNumPlayers).fill(0); 
-      document.getElementById("player-name-modal").style.display = "none";
-      document.getElementById("game-area").style.display = "block";
-      ativarFundo();
-      iniciarRodada();
-  }
-  
-  function iniciarRodada() {
-    document.getElementById("result-container").style.display = "none"; // Esconde o resultado anterior
-    document.getElementById("shadow-board").style.display = "flex";
-    document.getElementById("pieces").style.display = "flex";
-    document.getElementById("verify").style.display = "inline-block";
-
-    const currentPlayer = players[currentPlayerIndex];
-    document.getElementById("currentPlayer").textContent = `Vez de: ${currentPlayer}`;
-    gerarPerguntas();
-    resetTimer();
+    }, 1000);
   }
 
-  function gerarPerguntas() {
-    const shadowBoard = document.getElementById("shadow-board");
-    const pieces = document.getElementById("pieces");
-    shadowBoard.innerHTML = "";
-    pieces.innerHTML = "";
+  function atualizarDisplayTimer() {
+    const m = Math.floor(timeLeft / 60);
+    const s = String(timeLeft % 60).padStart(2, '0');
+    document.getElementById('timer').textContent = `${m}:${s}`;
+  }
 
-    perguntas.forEach((p) => {
-      const slot = document.createElement("div");
-      slot.className = "shadow-slot";
-      slot.dataset.resposta = p.resposta;
-      slot.textContent = p.pergunta; 
-      slot.dataset.pergunta = p.pergunta; 
-      slot.addEventListener("dragover", e => e.preventDefault());
-      slot.addEventListener("drop", soltar);
-      shadowBoard.appendChild(slot);
+  function gerarElementos() {
+    const board = document.getElementById('shadow-board');
+    const piecesContainer = document.getElementById('pieces');
+    board.innerHTML = '';
+    piecesContainer.innerHTML = '';
+
+    // Cria Slots
+    perguntas.forEach(p => {
+      const slot = document.createElement('div');
+      slot.className = 'shadow-slot';
+      slot.dataset.perguntaOriginal = p.pergunta;
+      slot.dataset.respostaCorreta = p.resposta;
+      slot.innerHTML = `<span>${p.pergunta}</span>`;
+      
+      // Eventos Drop
+      slot.addEventListener('dragover', e => e.preventDefault());
+      slot.addEventListener('drop', soltarPeca);
+      
+      board.appendChild(slot);
     });
 
-    const shuffled = [...perguntas].sort(() => Math.random() - 0.5).map(p => p.resposta);
-    shuffled.forEach(resp => {
-      const piece = document.createElement("div");
-      piece.className = "piece";
+    // Cria Peças Embaralhadas
+    const respostasMisturadas = [...perguntas]
+        .map(p => p.resposta)
+        .sort(() => Math.random() - 0.5);
+        
+    respostasMisturadas.forEach(resp => {
+      const piece = document.createElement('div');
+      piece.className = 'piece';
       piece.textContent = resp;
       piece.draggable = true;
-      piece.addEventListener("dragstart", e => e.dataTransfer.setData("text", resp));
-      pieces.appendChild(piece);
+      piece.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', resp);
+      });
+      piecesContainer.appendChild(piece);
     });
   }
 
-  function soltar(e) {
-    e.preventDefault(); 
-    const resposta = e.dataTransfer.getData("text");
-    const slot = e.target.closest('.shadow-slot'); 
-    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === resposta);
+  function soltarPeca(e) {
+    e.preventDefault();
+    const respostaArrastada = e.dataTransfer.getData('text/plain');
+    const slot = e.currentTarget;
+    
+    // Se já tem resposta, não faz nada (ou poderia substituir)
+    if(slot.dataset.respostaUsuario) return;
 
-    if (slot && !slot.dataset.userAnswer) {
-      slot.innerHTML = `<span>${slot.dataset.pergunta}</span><br><span style="color:#2980b9; font-weight:bold;"> → ${resposta}</span> <span class='remove-icon' onclick='event.stopPropagation(); removerResposta(this.parentNode)'>X</span>`;
-      slot.dataset.userAnswer = resposta;
-      piece.classList.add("used");
-      piece.draggable = false;
+    // Acha a peça original para marcar como usada
+    const allPieces = document.querySelectorAll('.piece');
+    let pecaOriginal;
+    for(let p of allPieces) {
+      if(p.textContent === respostaArrastada && !p.classList.contains('used')) {
+        pecaOriginal = p;
+        break;
+      }
+    }
+
+    if(pecaOriginal) {
+      // Marca visualmente no slot
+      slot.dataset.respostaUsuario = respostaArrastada;
+      
+      // Atualiza HTML do slot com botão de remover
+      const textoPergunta = slot.dataset.perguntaOriginal;
+      slot.innerHTML = `
+        <span>${textoPergunta}</span>
+        <div class="resposta-encaixada">${respostaArrastada}</div>
+        <div class="remove-icon" onclick="removerResposta(this)">X</div>
+      `;
+      slot.querySelector('.remove-icon').style.display = 'block';
+
+      // Desabilita peça
+      pecaOriginal.classList.add('used');
+      pecaOriginal.draggable = false;
     }
   }
 
-  function removerResposta(slot) {
-    const antigo = slot.dataset.userAnswer;
-    if (!antigo) return;
-    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === antigo);
-    if (piece) { piece.classList.remove("used"); piece.draggable = true; }
-    slot.innerHTML = slot.dataset.pergunta;
-    delete slot.dataset.userAnswer;
-    slot.classList.remove("correct", "wrong");
+  function removerResposta(btn) {
+    const slot = btn.parentElement;
+    const respostaRemovida = slot.dataset.respostaUsuario;
+    
+    // Limpa slot
+    delete slot.dataset.respostaUsuario;
+    slot.innerHTML = `<span>${slot.dataset.perguntaOriginal}</span>`;
+    slot.classList.remove('correct', 'wrong');
+
+    // Reabilita peça
+    const allPieces = document.querySelectorAll('.piece');
+    for(let p of allPieces) {
+      if(p.textContent === respostaRemovida && p.classList.contains('used')) {
+        p.classList.remove('used');
+        p.draggable = true;
+        break; // Só reabilita uma
+      }
+    }
   }
 
-  /* 🌟 LÓGICA PRINCIPAL DE VERIFICAÇÃO E GABARITO */
+  /* ==========================================
+     VERIFICAÇÃO E GABARITO
+     ========================================== */
   function verificar() {
     clearInterval(timerInterval);
+    
     let acertos = 0;
     let erros = 0;
-    let htmlErros = "";
+    let htmlGabarito = "";
 
-    document.querySelectorAll(".shadow-slot").forEach(slot => {
-      const correta = slot.dataset.resposta;
-      const respostaUser = slot.dataset.userAnswer;
-      
-      slot.classList.remove("correct", "wrong");
+    const slots = document.querySelectorAll('.shadow-slot');
+    
+    slots.forEach(slot => {
+      const correta = slot.dataset.respostaCorreta;
+      const usuario = slot.dataset.respostaUsuario;
 
-      if (respostaUser === correta) {
+      if(usuario === correta) {
         acertos++;
-        slot.classList.add("correct");
       } else {
-        // 🚩 Detectou erro: monta o HTML do gabarito
         erros++;
-        slot.classList.add("wrong");
-        const respostaExibida = respostaUser ? respostaUser : "(Sem resposta)";
-        
-        htmlErros += `
-          <div class="gabarito-item">
-            <span class="gabarito-pergunta">${slot.dataset.pergunta}</span>
-            Você colocou: <span class="gabarito-errada">${respostaExibida}</span><br>
-            Correta: <span class="gabarito-correta">${correta}</span>
+        // Adiciona ao HTML do gabarito apenas os ERROS (ou não respondidas)
+        const respExibida = usuario ? usuario : "<span style='color:#e74c3c'>(Sem resposta)</span>";
+        htmlGabarito += `
+          <div class="gabarito-row erro">
+            <div class="gabarito-texto">
+              <div style="margin-bottom:4px">${slot.dataset.perguntaOriginal}</div>
+              <span class="gabarito-label">Você colocou:</span> ${respExibida}<br>
+              <span class="gabarito-label" style="color:#27ae60">Correta:</span> <strong>${correta}</strong>
+            </div>
+            <div style="font-size:1.5em">❌</div>
           </div>
         `;
       }
     });
 
-    // Cálculo da Pontuação e Tempo com Penalidade
+    // Cálculo Final
     const tempoGasto = totalTime - timeLeft;
-    const penalidade = erros * 4; // 4 segundos por erro
-    const tempoFinal = tempoGasto + penalidade;
+    const penalidade = erros * 4;
+    const tempoTotalRanking = tempoGasto + penalidade;
 
+    // Salva dados
     scores[currentPlayerIndex] = acertos;
-    times[currentPlayerIndex] = tempoFinal; // Salva o tempo COM a penalidade
+    finalTimes[currentPlayerIndex] = tempoTotalRanking;
 
-    // Exibir Resultados
-    const scoreDiv = document.getElementById("result-score");
-    const gabaritoDiv = document.getElementById("gabarito-lista");
-    const resultContainer = document.getElementById("result-container");
+    // Exibe Tela de Resultado (Esconde Jogo)
+    document.getElementById('game-play-container').style.display = 'none';
+    const resContainer = document.getElementById('result-container');
+    resContainer.style.display = 'block';
 
-    // Esconde tabuleiro para focar no resultado
-    document.getElementById("shadow-board").style.display = "none";
-    document.getElementById("pieces").style.display = "none";
-    document.getElementById("verify").style.display = "none";
-
-    scoreDiv.innerHTML = `
-      Acertos: ${acertos} / ${perguntas.length}<br>
-      Tempo Gasto: ${tempoGasto}s <span style="color:#c0392b; font-size:0.8em;">(+${penalidade}s de penalidade)</span><br>
-      <strong>Tempo Final: ${tempoFinal}s</strong>
-    `;
-
-    if (erros > 0) {
-      gabaritoDiv.innerHTML = "<h3>❌ Correção dos Erros:</h3>" + htmlErros;
+    // Monta cabeçalho do resultado
+    const msgAcertos = `<h3>Você acertou ${acertos} de ${perguntas.length}</h3>`;
+    const msgTempo = `<p>Tempo gasto: ${tempoGasto}s <span style="color:#c0392b">(+${penalidade}s penalidade)</span> = <strong>${tempoTotalRanking}s</strong></p>`;
+    
+    document.getElementById('score-header').innerHTML = msgAcertos + msgTempo;
+    
+    // Monta lista de gabarito
+    const divLista = document.getElementById('gabarito-lista');
+    if(erros === 0) {
+      divLista.innerHTML = '<div class="gabarito-row acerto" style="justify-content:center; font-weight:bold;">🎉 PARABÉNS! VOCÊ GABARITOU! 🎉</div>';
     } else {
-      gabaritoDiv.innerHTML = "<h3 style='color:#27ae60'>🎉 Parabéns! Gabaritou!</h3>";
+      divLista.innerHTML = '<h4 style="margin-top:0">Correção dos Erros:</h4>' + htmlGabarito;
     }
-
-    resultContainer.style.display = "block";
-    // O jogo agora PAUSA aqui até clicar em "Continuar"
+    
+    // Ajusta botão
+    const btnCont = document.getElementById('btn-continuar');
+    if(currentPlayerIndex < players.length - 1) {
+      btnCont.textContent = `Próximo Jogador (${players[currentPlayerIndex+1]}) ➡`;
+    } else {
+      btnCont.textContent = "Ver Ranking Final 🏆";
+    }
   }
 
-  function resetTimer() {
-    clearInterval(timerInterval);
-    timeLeft = totalTime; 
-    updateTimer();
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      updateTimer();
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        verificar();
-      }
-    }, 1000);
-  }
-
-  function updateTimer() {
-    const min = Math.floor(timeLeft / 60);
-    const sec = String(timeLeft % 60).padStart(2, "0");
-    document.getElementById("timer").textContent = `Tempo: ${min}:${sec}`;
-  }
-
-  function proximaRodada() {
+  function avancarProximoJogador() {
     currentPlayerIndex++;
-    if (currentPlayerIndex < players.length) {
-      iniciarRodada();
+    if(currentPlayerIndex < players.length) {
+      carregarRodada();
     } else {
-      mostrarRanking();
+      mostrarRankingFinal();
     }
   }
 
-  function mostrarRanking() {
-    document.getElementById("game-area").style.display = "none"; // Esconde área de jogo e resultado
-    const rankingDiv = document.getElementById("ranking");
-    rankingDiv.style.display = "block";
-    rankingDiv.innerHTML = "<h2>🏆 Ranking Final</h2><p style='font-size:0.9em; color:#555;'>Critério: Mais acertos, depois menor tempo (incluindo penalidades).</p>";
-
-    const ranking = players.map((p, i) => ({ 
-        nome: p, 
-        pontos: scores[i], 
-        tempo: times[i] 
-      }))
-      .sort((a, b) => {
-        if (b.pontos !== a.pontos) return b.pontos - a.pontos; // Quem tem mais pontos ganha
-        return a.tempo - b.tempo; // Quem tem menor tempo ganha
-      });
-
-    ranking.forEach((r, i) => {
-      const tempoStr = `(${r.tempo}s)`;
-      const pontoStr = r.pontos === 1 ? 'ponto' : 'pontos';
-      let medalha = i === 0 ? "🥇" : (i === 1 ? "🥈" : (i === 2 ? "🥉" : `${i+1}º`));
-
-      rankingDiv.innerHTML += `
-        <p style="font-size: 1.2em; border-bottom: 1px solid #eee; padding: 10px;">
-          ${medalha} <strong>${r.nome}</strong><br>
-          <span class="rank-highlight" style="color:#2980b9">${r.pontos} ${pontoStr}</span> 
-          <span style="color:#7f8c8d">${tempoStr}</span>
-        </p>`;
+  function mostrarRankingFinal() {
+    document.getElementById('game-area').style.display = 'none';
+    const rankingDiv = document.getElementById('ranking');
+    rankingDiv.style.display = 'block';
+    
+    // Cria array de objetos para ordenar
+    let dadosRanking = players.map((nome, i) => {
+      return {
+        nome: nome,
+        pontos: scores[i],
+        tempo: finalTimes[i]
+      };
     });
+
+    // Ordena: Mais Pontos > Menor Tempo
+    dadosRanking.sort((a, b) => {
+      if(b.pontos !== a.pontos) return b.pontos - a.pontos;
+      return a.tempo - b.tempo;
+    });
+
+    let html = '<h2 style="text-align:center; color:#2c3e50">🏆 Classificação Final</h2>';
+    html += '<p style="text-align:center; color:#7f8c8d; font-size:0.9em">Critério: Mais acertos | Desempate: Menor tempo (incluindo penalidades)</p><hr>';
+
+    dadosRanking.forEach((d, i) => {
+      let medalha = "";
+      if(i===0) medalha = "🥇";
+      else if(i===1) medalha = "🥈";
+      else if(i===2) medalha = "🥉";
+      else medalha = `${i+1}º`;
+
+      html += `
+        <div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee; align-items:center;">
+          <div style="font-size:1.2em"><strong>${medalha} ${d.nome}</strong></div>
+          <div style="text-align:right">
+            <div style="color:#2980b9; font-weight:bold">${d.pontos} pts</div>
+            <div style="color:#7f8c8d; font-size:0.9em">${d.tempo}s totais</div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '<br><button onclick="location.reload()" style="width:100%; padding:15px; background:#34495e; color:white; border:none; cursor:pointer; border-radius:5px;">Jogar Novamente</button>';
+
+    rankingDiv.innerHTML = html;
   }
 </script>
 
