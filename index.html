@@ -10,10 +10,10 @@
     text-align: center;
     padding: 20px;
     transition: background 0.5s ease;
-    padding-bottom: 100px; /* Espaço extra para rolagem */
+    padding-bottom: 100px;
   }
 
-  /* 🌟 Fundo Animado (Ativado via JS) */
+  /* 🌟 Fundo Animado (Gif) */
   body.fundo-animado {
     background-image: url('imagem.gif');
     background-size: cover;
@@ -21,7 +21,7 @@
     background-attachment: fixed;
   }
 
-  /* Estilos para leitura em cima do GIF */
+  /* Melhorar leitura do título */
   h1 {
      background-color: rgba(255, 255, 255, 0.9);
      display: inline-block;
@@ -30,19 +30,11 @@
      color: #2c3e50;
      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-
-  h2 {
-    color: #fff;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-  }
   
-  /* Quando dentro de caixas brancas, remove sombra e ajusta cor */
-  .modal-content h2, #result-container h2, #ranking h2 {
-    color: #2c3e50;
-    text-shadow: none;
-  }
+  h2 { color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+  .modal-content h2, #result-container h2, #ranking h2 { color: #2c3e50; text-shadow: none; }
 
-  /* --- 🔊 BOTÃO DE SOM --- */
+  /* 🔊 BOTÃO DE SOM */
   #btn-som {
     position: fixed;
     top: 15px;
@@ -51,7 +43,7 @@
     font-size: 16px;
     font-weight: bold;
     color: white;
-    background-color: #e74c3c; /* Vermelho = mudo */
+    background-color: #e74c3c;
     border: none;
     border-radius: 50px;
     cursor: pointer;
@@ -60,7 +52,7 @@
     transition: transform 0.2s;
   }
   #btn-som:hover { transform: scale(1.05); }
-  #btn-som.tocando { background-color: #2ecc71; } /* Verde = tocando */
+  #btn-som.tocando { background-color: #2ecc71; }
 
   .config { 
     margin-bottom: 20px; 
@@ -72,7 +64,7 @@
   
   #game-area { display: none; }
 
-  /* --- 🧩 TABULEIRO --- */
+  /* 🧩 TABULEIRO */
   #shadow-board, #pieces {
     display: flex;
     flex-wrap: wrap;
@@ -83,11 +75,11 @@
 
   .shadow-slot {
     width: 260px; 
-    min-height: 70px; /* Um pouco maior para caber texto */
+    min-height: 70px;
     border: 2px dashed #555;
     background-color: rgba(240, 240, 240, 0.95);
     display: flex;
-    flex-direction: column; /* Organiza texto e resposta verticalmente */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
@@ -98,7 +90,6 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   }
 
-  /* Botão X para remover */
   .remove-icon {
     position: absolute;
     top: 5px;
@@ -111,7 +102,7 @@
     width: 20px;
     height: 20px;
     line-height: 20px;
-    display: none; /* Escondido até ter resposta */
+    display: none;
   }
 
   .resposta-encaixada {
@@ -162,9 +153,9 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   }
 
-  /* --- 📝 RESULTADO E GABARITO (Aparece no final) --- */
+  /* 📝 RESULTADO E GABARITO VISUAL */
   #result-container {
-    display: none; /* Começa oculto */
+    display: none;
     background-color: rgba(255, 255, 255, 0.98);
     padding: 25px;
     border-radius: 10px;
@@ -215,7 +206,6 @@
   }
   #btn-continuar:hover { background-color: #219150; }
 
-  /* Botão Voltar */
   .back-button {
     position: fixed;
     top: 15px;
@@ -230,7 +220,7 @@
 
   /* MODAIS */
   #player-name-modal, #rules-modal { 
-    display: none; /* Controlado via JS */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -241,7 +231,7 @@
     align-items: center;
     z-index: 3000;
   }
-  #rules-modal { display: flex; } /* Regras aparecem primeiro */
+  #rules-modal { display: flex; }
 
   .modal-content {
     background-color: #ecf0f1;
@@ -256,7 +246,6 @@
   .player-input-group { margin-bottom: 10px; }
   .player-input-group input { width: 100%; padding: 8px; margin-top: 5px; }
 
-  /* RANKING */
   #ranking {
     display: none;
     background: white;
@@ -272,7 +261,6 @@
 
 <audio id="musica-fundo" loop>
     <source src="dark.mp4" type="audio/mp4">
-    Seu navegador não suporta áudio.
 </audio>
 
 <button id="btn-som" onclick="alternarSom()">🔇 Som Desligado</button>
@@ -309,10 +297,8 @@
   </div>
 
   <div id="result-container">
-    <div id="score-header">
-        </div>
-    <div id="gabarito-lista">
-        </div>
+    <div id="score-header"></div>
+    <div id="gabarito-lista"></div>
     <button id="btn-continuar" onclick="avancarProximoJogador()">Continuar ➡</button>
   </div>
 </div>
@@ -325,8 +311,7 @@
     <ul>
       <li>Arraste a resposta azul para a caixa cinza correspondente.</li>
       <li><strong>Pontuação:</strong> +1 ponto por acerto.</li>
-      <li><strong>Penalidade:</strong> +4 segundos no tempo final por cada erro!</li>
-      <li>Vence quem acertar mais em menos tempo.</li>
+      <li>O ranking é definido por quem acerta mais em menos tempo.</li>
     </ul>
     <button onclick="fecharRegras()" style="width:100%; padding:10px; background:#2ecc71; color:white; border:none; border-radius:5px; cursor:pointer; font-size:1.1em;">Entendi</button>
   </div>
@@ -341,9 +326,7 @@
 </div>
 
 <script>
-  /* ==========================================
-     CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
-     ========================================== */
+  /* ================= VARIAVEIS ================= */
   const perguntas = [
     { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
     { pergunta: "Corrente elétrica deposita camada metálica sobre a superfície.", resposta: "Eletrodeposição" },
@@ -365,31 +348,23 @@
   let players = [];
   let currentPlayerIndex = 0;
   let scores = [];
-  let finalTimes = []; // Tempo total (gasto + penalidade)
+  let times = [];
   
-  let totalTime = 300; // 5 minutos
+  let totalTime = 300; 
   let timeLeft = 300;
   let timerInterval;
 
-  /* ==========================================
-     CONTROLE DE ÁUDIO E INTERFACE
-     ========================================== */
-  function fecharRegras() {
-    document.getElementById('rules-modal').style.display = 'none';
-  }
+  /* ================= FUNÇÕES GERAIS ================= */
+  function fecharRegras() { document.getElementById('rules-modal').style.display = 'none'; }
 
   function alternarSom() {
     const audio = document.getElementById('musica-fundo');
     const btn = document.getElementById('btn-som');
-    
     if (audio.paused) {
       audio.play().then(() => {
         btn.innerHTML = "🔊 Som Ligado";
         btn.classList.add('tocando');
-      }).catch(err => {
-        console.error(err);
-        alert("Não foi possível reproduzir 'dark.mp4'. Verifique se o arquivo está na pasta.");
-      });
+      }).catch(err => console.log(err));
     } else {
       audio.pause();
       btn.innerHTML = "🔇 Som Desligado";
@@ -397,29 +372,22 @@
     }
   }
 
-  function ativarFundoAnimado() {
-    document.body.classList.add('fundo-animado');
-  }
+  function ativarFundoAnimado() { document.body.classList.add('fundo-animado'); }
 
-  /* ==========================================
-     LÓGICA DE INÍCIO DE JOGO
-     ========================================== */
   function prepararJogo() {
-    // Tenta tocar música automaticamente
+    // Tenta som
     const audio = document.getElementById('musica-fundo');
     const btn = document.getElementById('btn-som');
     audio.play().then(() => {
        btn.innerHTML = "🔊 Som Ligado";
        btn.classList.add('tocando');
-    }).catch(() => console.log("Autoplay bloqueado, aguardando clique do usuário."));
+    }).catch(() => {});
 
     const qtd = parseInt(document.getElementById('numPlayers').value);
-    
     if (qtd === 1) {
       players = ["Jogador 1"];
       iniciarPartidaReal();
     } else {
-      // Abre modal de nomes
       document.getElementById('config-screen').style.display = 'none';
       const form = document.getElementById('names-form');
       form.innerHTML = '';
@@ -442,35 +410,27 @@
   }
 
   function iniciarPartidaReal() {
-    // Esconde config, mostra jogo, ativa fundo
     document.getElementById('config-screen').style.display = 'none';
     document.getElementById('game-area').style.display = 'block';
     ativarFundoAnimado();
     
-    // Inicializa arrays de pontuação
     scores = new Array(players.length).fill(0);
-    finalTimes = new Array(players.length).fill(0);
+    times = new Array(players.length).fill(0);
     
     currentPlayerIndex = 0;
     carregarRodada();
   }
 
-  /* ==========================================
-     LÓGICA DA RODADA
-     ========================================== */
+  /* ================= LÓGICA DE JOGO ================= */
   function carregarRodada() {
-    // 1. Reseta Interface
     document.getElementById('result-container').style.display = 'none';
     document.getElementById('game-play-container').style.display = 'block';
     
-    // 2. Atualiza Info do Jogador
     const nome = players[currentPlayerIndex];
     document.getElementById('currentPlayerName').textContent = `Vez de: ${nome}`;
     
-    // 3. Gera Tabuleiro e Peças
     gerarElementos();
     
-    // 4. Inicia Timer
     timeLeft = totalTime;
     atualizarDisplayTimer();
     clearInterval(timerInterval);
@@ -479,7 +439,7 @@
       atualizarDisplayTimer();
       if(timeLeft <= 0) {
         clearInterval(timerInterval);
-        verificar(); // Acabou o tempo
+        verificar();
       }
     }, 1000);
   }
@@ -496,34 +456,24 @@
     board.innerHTML = '';
     piecesContainer.innerHTML = '';
 
-    // Cria Slots
     perguntas.forEach(p => {
       const slot = document.createElement('div');
       slot.className = 'shadow-slot';
       slot.dataset.perguntaOriginal = p.pergunta;
       slot.dataset.respostaCorreta = p.resposta;
       slot.innerHTML = `<span>${p.pergunta}</span>`;
-      
-      // Eventos Drop
       slot.addEventListener('dragover', e => e.preventDefault());
       slot.addEventListener('drop', soltarPeca);
-      
       board.appendChild(slot);
     });
 
-    // Cria Peças Embaralhadas
-    const respostasMisturadas = [...perguntas]
-        .map(p => p.resposta)
-        .sort(() => Math.random() - 0.5);
-        
+    const respostasMisturadas = [...perguntas].map(p => p.resposta).sort(() => Math.random() - 0.5);
     respostasMisturadas.forEach(resp => {
       const piece = document.createElement('div');
       piece.className = 'piece';
       piece.textContent = resp;
       piece.draggable = true;
-      piece.addEventListener('dragstart', e => {
-        e.dataTransfer.setData('text/plain', resp);
-      });
+      piece.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', resp));
       piecesContainer.appendChild(piece);
     });
   }
@@ -532,11 +482,8 @@
     e.preventDefault();
     const respostaArrastada = e.dataTransfer.getData('text/plain');
     const slot = e.currentTarget;
-    
-    // Se já tem resposta, não faz nada (ou poderia substituir)
     if(slot.dataset.respostaUsuario) return;
 
-    // Acha a peça original para marcar como usada
     const allPieces = document.querySelectorAll('.piece');
     let pecaOriginal;
     for(let p of allPieces) {
@@ -545,21 +492,14 @@
         break;
       }
     }
-
     if(pecaOriginal) {
-      // Marca visualmente no slot
       slot.dataset.respostaUsuario = respostaArrastada;
-      
-      // Atualiza HTML do slot com botão de remover
-      const textoPergunta = slot.dataset.perguntaOriginal;
       slot.innerHTML = `
-        <span>${textoPergunta}</span>
+        <span>${slot.dataset.perguntaOriginal}</span>
         <div class="resposta-encaixada">${respostaArrastada}</div>
         <div class="remove-icon" onclick="removerResposta(this)">X</div>
       `;
       slot.querySelector('.remove-icon').style.display = 'block';
-
-      // Desabilita peça
       pecaOriginal.classList.add('used');
       pecaOriginal.draggable = false;
     }
@@ -568,26 +508,19 @@
   function removerResposta(btn) {
     const slot = btn.parentElement;
     const respostaRemovida = slot.dataset.respostaUsuario;
-    
-    // Limpa slot
     delete slot.dataset.respostaUsuario;
     slot.innerHTML = `<span>${slot.dataset.perguntaOriginal}</span>`;
-    slot.classList.remove('correct', 'wrong');
-
-    // Reabilita peça
     const allPieces = document.querySelectorAll('.piece');
     for(let p of allPieces) {
       if(p.textContent === respostaRemovida && p.classList.contains('used')) {
         p.classList.remove('used');
         p.draggable = true;
-        break; // Só reabilita uma
+        break;
       }
     }
   }
 
-  /* ==========================================
-     VERIFICAÇÃO E GABARITO
-     ========================================== */
+  /* ================= VERIFICAÇÃO E GABARITO (SEM PENALIDADE) ================= */
   function verificar() {
     clearInterval(timerInterval);
     
@@ -605,7 +538,7 @@
         acertos++;
       } else {
         erros++;
-        // Adiciona ao HTML do gabarito apenas os ERROS (ou não respondidas)
+        // Prepara o gabarito visual dos erros
         const respExibida = usuario ? usuario : "<span style='color:#e74c3c'>(Sem resposta)</span>";
         htmlGabarito += `
           <div class="gabarito-row erro">
@@ -620,35 +553,31 @@
       }
     });
 
-    // Cálculo Final
+    // Salva Pontuação e Tempo (SEM PENALIDADE)
     const tempoGasto = totalTime - timeLeft;
-    const penalidade = erros * 4;
-    const tempoTotalRanking = tempoGasto + penalidade;
-
-    // Salva dados
     scores[currentPlayerIndex] = acertos;
-    finalTimes[currentPlayerIndex] = tempoTotalRanking;
+    times[currentPlayerIndex] = tempoGasto;
 
-    // Exibe Tela de Resultado (Esconde Jogo)
+    // Troca a visualização para o Resultado
     document.getElementById('game-play-container').style.display = 'none';
     const resContainer = document.getElementById('result-container');
     resContainer.style.display = 'block';
 
-    // Monta cabeçalho do resultado
-    const msgAcertos = `<h3>Você acertou ${acertos} de ${perguntas.length}</h3>`;
-    const msgTempo = `<p>Tempo gasto: ${tempoGasto}s <span style="color:#c0392b">(+${penalidade}s penalidade)</span> = <strong>${tempoTotalRanking}s</strong></p>`;
+    // Cabeçalho
+    document.getElementById('score-header').innerHTML = `
+        <h3>Você acertou ${acertos} de ${perguntas.length}</h3>
+        <p>Tempo: <strong>${tempoGasto}s</strong></p>
+    `;
     
-    document.getElementById('score-header').innerHTML = msgAcertos + msgTempo;
-    
-    // Monta lista de gabarito
+    // Lista de Erros
     const divLista = document.getElementById('gabarito-lista');
     if(erros === 0) {
       divLista.innerHTML = '<div class="gabarito-row acerto" style="justify-content:center; font-weight:bold;">🎉 PARABÉNS! VOCÊ GABARITOU! 🎉</div>';
     } else {
-      divLista.innerHTML = '<h4 style="margin-top:0">Correção dos Erros:</h4>' + htmlGabarito;
+      divLista.innerHTML = '<h4 style="margin-top:0">Onde você errou:</h4>' + htmlGabarito;
     }
     
-    // Ajusta botão
+    // Botão Continuar
     const btnCont = document.getElementById('btn-continuar');
     if(currentPlayerIndex < players.length - 1) {
       btnCont.textContent = `Próximo Jogador (${players[currentPlayerIndex+1]}) ➡`;
@@ -671,13 +600,8 @@
     const rankingDiv = document.getElementById('ranking');
     rankingDiv.style.display = 'block';
     
-    // Cria array de objetos para ordenar
     let dadosRanking = players.map((nome, i) => {
-      return {
-        nome: nome,
-        pontos: scores[i],
-        tempo: finalTimes[i]
-      };
+      return { nome: nome, pontos: scores[i], tempo: times[i] };
     });
 
     // Ordena: Mais Pontos > Menor Tempo
@@ -687,28 +611,20 @@
     });
 
     let html = '<h2 style="text-align:center; color:#2c3e50">🏆 Classificação Final</h2>';
-    html += '<p style="text-align:center; color:#7f8c8d; font-size:0.9em">Critério: Mais acertos | Desempate: Menor tempo (incluindo penalidades)</p><hr>';
-
     dadosRanking.forEach((d, i) => {
-      let medalha = "";
-      if(i===0) medalha = "🥇";
-      else if(i===1) medalha = "🥈";
-      else if(i===2) medalha = "🥉";
-      else medalha = `${i+1}º`;
-
+      let medalha = (i===0) ? "🥇" : (i===1 ? "🥈" : (i===2 ? "🥉" : `${i+1}º`));
       html += `
         <div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee; align-items:center;">
           <div style="font-size:1.2em"><strong>${medalha} ${d.nome}</strong></div>
           <div style="text-align:right">
             <div style="color:#2980b9; font-weight:bold">${d.pontos} pts</div>
-            <div style="color:#7f8c8d; font-size:0.9em">${d.tempo}s totais</div>
+            <div style="color:#7f8c8d; font-size:0.9em">${d.tempo}s</div>
           </div>
         </div>
       `;
     });
 
     html += '<br><button onclick="location.reload()" style="width:100%; padding:15px; background:#34495e; color:white; border:none; cursor:pointer; border-radius:5px;">Jogar Novamente</button>';
-
     rankingDiv.innerHTML = html;
   }
 </script>
