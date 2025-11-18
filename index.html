@@ -5,36 +5,39 @@
 <title>Quiz de Encaixe</title>
 <style>
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f3f7;
+    font-family: Arial, sans-serif;
+    background-color: #f0f3f7; /* Cor padrão antes de iniciar */
     text-align: center;
     padding: 20px;
-    transition: background 0.5s ease;
-    padding-bottom: 100px;
+    transition: background 0.5s ease; /* Suaviza a troca de fundo */
   }
 
-  /* 🌟 Fundo Animado (Gif) */
+  /* 🌟 NOVO: Classe para o fundo com GIF */
   body.fundo-animado {
     background-image: url('imagem.gif');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-size: cover;      /* Cobre a tela toda */
+    background-position: center; /* Centraliza */
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* O fundo fica parado enquanto a tela rola */
   }
 
-  /* Melhorar leitura do título */
-  h1 {
-     background-color: rgba(255, 255, 255, 0.9);
-     display: inline-block;
-     padding: 10px 25px;
-     border-radius: 10px;
-     color: #2c3e50;
-     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  /* Para garantir que o título fique legível em cima do GIF, adicionamos sombra */
+  h1, h2, #timer, #result {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); 
   }
   
-  h2 { color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
-  .modal-content h2, #result-container h2, #ranking h2 { color: #2c3e50; text-shadow: none; }
+  /* Fundo branco semitransparente atrás do título para ajudar a leitura */
+  h1 {
+     background-color: rgba(255, 255, 255, 0.8);
+     display: inline-block;
+     padding: 10px 20px;
+     border-radius: 10px;
+  }
 
-  /* 🔊 BOTÃO DE SOM */
+  .config { margin-bottom: 20px; }
+  #game-area { display: none; }
+
+  /* --- 🔊 ESTILO DO BOTÃO DE SOM --- */
   #btn-som {
     position: fixed;
     top: 15px;
@@ -48,23 +51,19 @@
     border-radius: 50px;
     cursor: pointer;
     z-index: 2000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    transition: transform 0.2s;
-  }
-  #btn-som:hover { transform: scale(1.05); }
-  #btn-som.tocando { background-color: #2ecc71; }
-
-  .config { 
-    margin-bottom: 20px; 
-    background: rgba(255,255,255,0.9);
-    padding: 20px;
-    border-radius: 10px;
-    display: inline-block;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
   }
   
-  #game-area { display: none; }
+  #btn-som.tocando {
+    background-color: #2ecc71;
+  }
+  
+  #btn-som:hover {
+    transform: scale(1.05);
+  }
+  /* --------------------------------- */
 
-  /* 🧩 TABULEIRO */
   #shadow-board, #pieces {
     display: flex;
     flex-wrap: wrap;
@@ -74,52 +73,51 @@
   }
 
   .shadow-slot {
-    width: 260px; 
-    min-height: 70px;
-    border: 2px dashed #555;
-    background-color: rgba(240, 240, 240, 0.95);
+    width: 250px; 
+    height: 60px;
+    border: 2px dashed #555; /* Borda mais escura para contraste */
+    background-color: rgba(236, 240, 241, 0.95); /* Fundo quase sólido para leitura */
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
     position: relative; 
-    padding: 10px;
-    text-align: center; 
-    font-size: 0.9em; 
+    padding-right: 25px; 
+    padding-left: 5px; 
+    text-align: left; 
+    font-size: 0.85em; 
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   }
 
   .remove-icon {
     position: absolute;
-    top: 5px;
     right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
     font-weight: bold;
     color: #e74c3c; 
-    background: #fff;
+    font-size: 1.2em;
+    padding: 0 5px;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    display: none;
+    transition: background-color 0.2s;
+  }
+  
+  .shadow-slot span {
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal;
+      line-height: 1.2;
   }
 
-  .resposta-encaixada {
-    margin-top: 5px;
-    color: #2980b9;
-    font-weight: bold;
-    background: #dff9fb;
-    padding: 4px 8px;
-    border-radius: 4px;
-    width: 90%;
-  }
-
-  .shadow-slot.correct { background-color: #a8e6a3; border-color: #27ae60; }
-  .shadow-slot.wrong { background-color: #f5a3a3; border-color: #c0392b; }
+  .remove-icon:hover { background-color: rgba(231, 76, 60, 0.2); }
+  .shadow-slot.correct { background-color: #a8e6a3; }
+  .shadow-slot.wrong { background-color: #f5a3a3; }
 
   .piece {
-    width: 160px; 
+    width: 150px; 
     height: 50px;
     background-color: #3498db;
     color: white;
@@ -129,82 +127,49 @@
     justify-content: center;
     cursor: grab;
     font-size: 0.9em; 
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3); /* Sombra para destacar do fundo */
     border: 1px solid #2980b9;
-    user-select: none;
   }
 
   .piece.used {
-    background-color: #95a5a6;
-    opacity: 0.6;
+    background-color: #7f8c8d;
     cursor: not-allowed;
     box-shadow: none;
   }
 
   #timer {
     font-size: 24px;
-    color: #fff;
+    color: #fff; /* Texto branco para contrastar com fundo */
     background-color: #e74c3c;
-    padding: 8px 20px;
+    padding: 5px 15px;
     border-radius: 20px;
     display: inline-block;
     margin: 10px;
     font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   }
 
-  /* 📝 RESULTADO E GABARITO VISUAL */
-  #result-container {
-    display: none;
-    background-color: rgba(255, 255, 255, 0.98);
-    padding: 25px;
-    border-radius: 10px;
-    max-width: 700px;
-    margin: 20px auto;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    text-align: left;
-    border: 1px solid #ddd;
-  }
-
-  #score-header {
-    text-align: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #ecf0f1;
-  }
-
-  .gabarito-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 6px;
-    background-color: #fff;
-    border-left: 5px solid #ccc;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  }
-
-  .gabarito-row.erro { border-left-color: #e74c3c; background-color: #fdeaea; }
-  .gabarito-row.acerto { border-left-color: #27ae60; background-color: #eafaf1; }
-
-  .gabarito-texto { flex: 1; padding-right: 10px; }
-  .gabarito-label { font-weight: bold; display: block; font-size: 0.85em; color: #7f8c8d; }
-  
-  #btn-continuar {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    background-color: #27ae60;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.2em;
-    cursor: pointer;
-    margin-top: 20px;
+  #result {
     font-weight: bold;
+    margin-top: 20px;
+    font-size: 18px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    display: inline-block;
   }
-  #btn-continuar:hover { background-color: #219150; }
+
+  #ranking {
+    margin-top: 20px;
+    display: none;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .rank-highlight { font-weight: bold; }
 
   .back-button {
     position: fixed;
@@ -216,45 +181,75 @@
     border-radius: 6px;
     text-decoration: none;
     z-index: 1500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
-  /* MODAIS */
+  #player-name-modal { display: none; }
+  #rules-modal { display: flex; }
+
   #player-name-modal, #rules-modal { 
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(0, 0, 0, 0.85); /* Mais escuro para focar */
     justify-content: center;
     align-items: center;
-    z-index: 3000;
+    z-index: 1000;
   }
-  #rules-modal { display: flex; }
 
   .modal-content {
     background-color: #ecf0f1;
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 450px;
+    width: 80%;
+    max-width: 400px;
     text-align: left;
   }
-  
-  .player-input-group { margin-bottom: 10px; }
-  .player-input-group input { width: 100%; padding: 8px; margin-top: 5px; }
 
-  #ranking {
-    display: none;
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    max-width: 500px;
-    margin: 50px auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  .modal-content h2 {
+    color: #2c3e50;
+    margin-top: 0;
+    border-bottom: 2px solid #bdc3c7;
+    padding-bottom: 10px;
+    text-align: center;
+    text-shadow: none; /* Remove sombra dentro do modal */
   }
+
+  #rules-text h3 { color: #3498db; margin-top: 20px; }
+  #rules-text ul { padding-left: 20px; }
+
+  .player-input-group { margin-bottom: 15px; }
+  .player-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #34495e;
+  }
+
+  .player-input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; 
+  }
+
+  #submitNames, #closeRules {
+    width: 100%;
+    padding: 10px;
+    background-color: #2ecc71; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  #submitNames:hover, #closeRules:hover { background-color: #27ae60; }
 </style>
 </head>
 <body>
@@ -267,66 +262,82 @@
 
 <a href="#" class="back-button" onclick="location.reload()">← Reiniciar</a>
 
-<h1 id="game-title">Quiz de Encaixe</h1>
+<h1 id="game-title">Quiz de Encaixe - Modo Single Player</h1>
 
-<div class="config" id="config-screen">
-  <label><strong>Número de Jogadores:</strong></label>
-  <select id="numPlayers" style="padding: 5px; margin: 10px;">
+<div class="config">
+  <label style="background: rgba(255,255,255,0.8); padding: 5px; border-radius: 4px;">Modo de jogo:</label>
+  <select id="numPlayers" onchange="updateTitle()">
     <option value="1">Single Player</option>
     <option value="2">2 Jogadores</option>
     <option value="3">3 Jogadores</option>
     <option value="4">4 Jogadores</option>
   </select>
   <div id="names"></div>
-  <br>
-  <button onclick="prepararJogo()" style="padding: 10px 25px; font-size: 1.1em; background-color:#2980b9; color:white; border:none; border-radius:5px; cursor:pointer;">Iniciar Jogo</button>
+  <br><br>
+  <button onclick="startGame()" style="padding: 10px 20px; font-size: 1.2em; cursor: pointer;">Iniciar Jogo</button>
 </div>
 
 <div id="game-area">
-  <h2 id="currentPlayerName" style="background:rgba(0,0,0,0.5); padding:5px 15px; border-radius:20px; display:inline-block;"></h2>
+  <h2 id="currentPlayer" style="background: rgba(255,255,255,0.8); display:inline-block; padding: 5px 15px; border-radius: 10px;"></h2>
   <br>
-  <div id="timer">05:00</div>
-
-  <div id="game-play-container">
-    <div id="shadow-board"></div>
-    <div id="pieces"></div>
-    <br>
-    <button id="verify-btn" onclick="verificar()" style="padding: 12px 30px; font-size: 1.2em; background-color: #f1c40f; border: none; border-radius: 5px; color: #000; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #d35400;">
-      Finalizar Tentativa
-    </button>
-  </div>
-
-  <div id="result-container">
-    <div id="score-header"></div>
-    <div id="gabarito-lista"></div>
-    <button id="btn-continuar" onclick="avancarProximoJogador()">Continuar ➡</button>
-  </div>
+  <div id="timer">Tempo: 5:00</div>
+  <div id="shadow-board"></div>
+  <div id="pieces"></div>
+  <button id="verify" onclick="verificar()" style="padding: 10px 20px; font-size: 1.1em; cursor: pointer; background-color: #f1c40f; border: none; border-radius: 5px; color: #000; font-weight: bold;">Finalizar Tentativa</button>
+  <br>
+  <div id="result"></div>
 </div>
 
 <div id="ranking"></div>
 
 <div id="rules-modal">
   <div class="modal-content">
-    <h2 style="text-align:center">📜 Regras</h2>
-    <ul>
-      <li>Arraste a resposta azul para a caixa cinza correspondente.</li>
-      <li><strong>Pontuação:</strong> +1 ponto por acerto.</li>
-      <li>O ranking é definido por quem acerta mais em menos tempo.</li>
-    </ul>
-    <button onclick="fecharRegras()" style="width:100%; padding:10px; background:#2ecc71; color:white; border:none; border-radius:5px; cursor:pointer; font-size:1.1em;">Entendi</button>
+    <h2>🏆 Regras do Quiz de Encaixe 🧩</h2>
+    <div id="rules-text">
+      <p>Este é um jogo de encaixe de conceitos...</p>
+      <h3>Como Funciona a Pontuação?</h3>
+      <ul>
+        <li>1 ponto por resposta correta.</li>
+      </ul>
+    </div>
+    <button id="closeRules" onclick="closeRulesAndShowConfig()">Entendi! Começar Jogo</button>
   </div>
 </div>
 
 <div id="player-name-modal">
   <div class="modal-content">
-    <h2 style="text-align:center">Jogadores</h2>
+    <h2>Insira os Nomes dos Jogadores</h2>
     <div id="names-form"></div>
-    <button onclick="iniciarComNomes()" style="width:100%; padding:10px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:15px;">Começar</button>
+    <button id="submitNames" onclick="submitNames()">Começar o Quiz</button>
   </div>
 </div>
 
 <script>
-  /* ================= VARIAVEIS ================= */
+  /* --- 🔊 FUNÇÃO DE SOM --- */
+  function alternarSom() {
+    const audio = document.getElementById('musica-fundo');
+    const botao = document.getElementById('btn-som');
+
+    if (audio.paused) {
+      audio.play().then(() => {
+        botao.innerHTML = "🔊 Som Ligado";
+        botao.classList.add("tocando");
+      }).catch(error => {
+        console.log("Erro ao tocar:", error);
+      });
+    } else {
+      audio.pause();
+      botao.innerHTML = "🔇 Som Desligado";
+      botao.classList.remove("tocando");
+    }
+  }
+
+  /* --- 🖼️ FUNÇÃO PARA ATIVAR O FUNDO GIF --- */
+  function ativarFundo() {
+      document.body.classList.add('fundo-animado');
+  }
+  /* ----------------------------------------- */
+
   const perguntas = [
     { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
     { pergunta: "Corrente elétrica deposita camada metálica sobre a superfície.", resposta: "Eletrodeposição" },
@@ -345,287 +356,258 @@
     { pergunta: "Forma óxidos protetores na superfície metálica.", resposta: "Oxidação térmica" }
   ];
 
-  let players = [];
   let currentPlayerIndex = 0;
+  let players = [];
   let scores = [];
-  let times = [];
-  
-  let totalTime = 300; 
-  let timeLeft = 300;
+  let times = []; 
   let timerInterval;
+  let totalTime = 300; 
+  let timeLeft = totalTime; 
 
-  /* ================= FUNÇÕES GERAIS ================= */
-  function fecharRegras() { document.getElementById('rules-modal').style.display = 'none'; }
+  let selectedNumPlayers = 1;
 
-  function alternarSom() {
-    const audio = document.getElementById('musica-fundo');
-    const btn = document.getElementById('btn-som');
-    if (audio.paused) {
-      audio.play().then(() => {
-        btn.innerHTML = "🔊 Som Ligado";
-        btn.classList.add('tocando');
-      }).catch(err => console.log(err));
-    } else {
-      audio.pause();
-      btn.innerHTML = "🔇 Som Desligado";
-      btn.classList.remove('tocando');
-    }
+  function closeRulesAndShowConfig() {
+      document.getElementById("rules-modal").style.display = "none";
+      document.querySelector(".config").style.display = "block"; 
   }
 
-  function ativarFundoAnimado() { document.body.classList.add('fundo-animado'); }
-
-  function prepararJogo() {
+  function startGame() {
     // Tenta som
     const audio = document.getElementById('musica-fundo');
-    const btn = document.getElementById('btn-som');
+    const botao = document.getElementById('btn-som');
     audio.play().then(() => {
-       btn.innerHTML = "🔊 Som Ligado";
-       btn.classList.add('tocando');
-    }).catch(() => {});
+       botao.innerHTML = "🔊 Som Ligado";
+       botao.classList.add("tocando");
+    }).catch(() => { console.log("Autoplay bloqueado"); });
 
-    const qtd = parseInt(document.getElementById('numPlayers').value);
-    if (qtd === 1) {
-      players = ["Jogador 1"];
-      iniciarPartidaReal();
+    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
+    
+    // Se for single player, já ativa o fundo aqui
+    if (selectedNumPlayers === 1) {
+        ativarFundo(); // <--- ATIVA O GIF
+        players = ["Jogador"];
+        scores = [0];
+        times = [totalTime];
+        document.querySelector(".config").style.display = "none";
+        document.getElementById("game-area").style.display = "block";
+        iniciarRodada();
     } else {
-      document.getElementById('config-screen').style.display = 'none';
-      const form = document.getElementById('names-form');
-      form.innerHTML = '';
-      for(let i=1; i<=qtd; i++){
-        form.innerHTML += `<div class="player-input-group"><label>Jogador ${i}:</label><input type="text" id="p${i}" placeholder="Nome"></div>`;
+        document.querySelector(".config").style.display = "none";
+        showNameModal(selectedNumPlayers);
+    }
+  }
+
+  function updateTitle() {
+    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
+    const gameTitle = document.getElementById("game-title");
+    if (selectedNumPlayers === 1) {
+      gameTitle.textContent = "Quiz de Encaixe - Modo Single Player";
+    } else {
+      gameTitle.textContent = "Quiz de Encaixe - Modo Multiplayer";
+    }
+  }
+
+  function showNameModal(num) {
+      const namesForm = document.getElementById("names-form");
+      namesForm.innerHTML = "";
+      
+      for (let i = 1; i <= num; i++) {
+          const group = document.createElement('div');
+          group.className = 'player-input-group';
+          const label = document.createElement('label');
+          label.textContent = `Nome do Jogador ${i}:`;
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.id = `player${i}`;
+          input.placeholder = `Nome do Jogador ${i}`;
+          group.appendChild(label);
+          group.appendChild(input);
+          namesForm.appendChild(group);
       }
-      document.getElementById('player-name-modal').style.display = 'flex';
+      document.getElementById("player-name-modal").style.display = "flex";
+  }
+
+  function submitNames() {
+      players = [];
+      for (let i = 1; i <= selectedNumPlayers; i++) {
+          const inputElement = document.getElementById(`player${i}`);
+          let name = inputElement.value.trim();
+          if (name === "") { name = `Jogador ${i}`; }
+          players.push(name);
+      }
+      scores = new Array(selectedNumPlayers).fill(0);
+      times = new Array(selectedNumPlayers).fill(0); 
+      
+      document.getElementById("player-name-modal").style.display = "none";
+      document.getElementById("game-area").style.display = "block";
+      
+      ativarFundo(); // <--- ATIVA O GIF AQUI NO MULTIPLAYER
+      iniciarRodada();
+  }
+  
+  function iniciarRodada() {
+    document.getElementById("result").textContent = "";
+    document.getElementById("result").style.display = "none"; // Esconde resultado antigo
+    const currentPlayer = players[currentPlayerIndex];
+    document.getElementById("currentPlayer").textContent = `Vez de: ${currentPlayer}`;
+    gerarPerguntas();
+    resetTimer();
+  }
+
+  function gerarPerguntas() {
+    const shadowBoard = document.getElementById("shadow-board");
+    const pieces = document.getElementById("pieces");
+    shadowBoard.innerHTML = "";
+    pieces.innerHTML = "";
+
+    perguntas.forEach((p, i) => {
+      const slot = document.createElement("div");
+      slot.className = "shadow-slot";
+      slot.dataset.resposta = p.resposta;
+      slot.textContent = p.pergunta; 
+      slot.dataset.pergunta = p.pergunta; 
+      slot.addEventListener("dragover", e => e.preventDefault());
+      slot.addEventListener("drop", soltar);
+      shadowBoard.appendChild(slot);
+    });
+
+    const respostasEmbaralhadas = [...perguntas].sort(() => Math.random() - 0.5).map(p => p.resposta);
+    respostasEmbaralhadas.forEach(resp => {
+      const piece = document.createElement("div");
+      piece.className = "piece";
+      piece.textContent = resp;
+      piece.draggable = true;
+      piece.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text", resp);
+      });
+      pieces.appendChild(piece);
+    });
+  }
+
+  function soltar(e) {
+    e.preventDefault(); 
+    const resposta = e.dataTransfer.getData("text");
+    const slot = e.target.closest('.shadow-slot'); 
+    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === resposta);
+
+    if (slot && !slot.dataset.userAnswer) {
+      const questionText = document.createElement('span');
+      questionText.textContent = slot.dataset.pergunta;
+
+      const answerText = document.createElement('span');
+      answerText.textContent = ` → ${resposta}`;
+      answerText.style.fontWeight = "bold";
+      answerText.style.color = "#2980b9";
+
+      const removeIcon = document.createElement('span');
+      removeIcon.textContent = 'X';
+      removeIcon.classList.add('remove-icon');
+      removeIcon.addEventListener('click', (event) => {
+        event.stopPropagation(); 
+        removerResposta(slot);
+      });
+
+      slot.innerHTML = ''; 
+      slot.appendChild(questionText);
+      slot.appendChild(answerText);
+      slot.appendChild(removeIcon);
+      
+      slot.dataset.userAnswer = resposta;
+      piece.classList.add("used");
+      piece.draggable = false;
     }
   }
 
-  function iniciarComNomes() {
-    const qtd = parseInt(document.getElementById('numPlayers').value);
-    players = [];
-    for(let i=1; i<=qtd; i++){
-      let nome = document.getElementById(`p${i}`).value.trim();
-      players.push(nome || `Jogador ${i}`);
+  function removerResposta(slot) {
+    const respostaAntiga = slot.dataset.userAnswer;
+    if (!respostaAntiga) return;
+    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === respostaAntiga);
+    if (piece) {
+      piece.classList.remove("used");
+      piece.draggable = true;
     }
-    document.getElementById('player-name-modal').style.display = 'none';
-    iniciarPartidaReal();
+    slot.innerHTML = ''; 
+    slot.textContent = slot.dataset.pergunta;
+    delete slot.dataset.userAnswer;
+    slot.classList.remove("correct", "wrong");
   }
 
-  function iniciarPartidaReal() {
-    document.getElementById('config-screen').style.display = 'none';
-    document.getElementById('game-area').style.display = 'block';
-    ativarFundoAnimado();
-    
-    scores = new Array(players.length).fill(0);
-    times = new Array(players.length).fill(0);
-    
-    currentPlayerIndex = 0;
-    carregarRodada();
-  }
+  function verificar() {
+    let acertos = 0;
+    document.querySelectorAll(".shadow-slot").forEach(slot => {
+      const correta = slot.dataset.resposta;
+      const resposta = slot.dataset.userAnswer;
+      slot.classList.remove("correct", "wrong");
+      if (resposta) {
+        if (resposta === correta) {
+          acertos++;
+          slot.classList.add("correct");
+        } else {
+          slot.classList.add("wrong");
+        }
+      }
+    });
 
-  /* ================= LÓGICA DE JOGO ================= */
-  function carregarRodada() {
-    document.getElementById('result-container').style.display = 'none';
-    document.getElementById('game-play-container').style.display = 'block';
+    scores[currentPlayerIndex] = acertos;
+    times[currentPlayerIndex] = totalTime - timeLeft; 
     
-    const nome = players[currentPlayerIndex];
-    document.getElementById('currentPlayerName').textContent = `Vez de: ${nome}`;
-    
-    gerarElementos();
-    
-    timeLeft = totalTime;
-    atualizarDisplayTimer();
+    const palavraPontuacao = acertos === 1 ? 'ponto' : 'pontos';
+    const resultDiv = document.getElementById("result");
+    resultDiv.textContent = `Você acertou ${acertos} de ${perguntas.length}! Pontuação: ${acertos} ${palavraPontuacao}.`;
+    resultDiv.style.display = "inline-block";
+
     clearInterval(timerInterval);
+    setTimeout(proximaRodada, 4000);
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    timeLeft = totalTime; 
+    updateTimer();
     timerInterval = setInterval(() => {
       timeLeft--;
-      atualizarDisplayTimer();
-      if(timeLeft <= 0) {
+      updateTimer();
+      if (timeLeft <= 0) {
         clearInterval(timerInterval);
         verificar();
       }
     }, 1000);
   }
 
-  function atualizarDisplayTimer() {
-    const m = Math.floor(timeLeft / 60);
-    const s = String(timeLeft % 60).padStart(2, '0');
-    document.getElementById('timer').textContent = `${m}:${s}`;
+  function updateTimer() {
+    const min = Math.floor(timeLeft / 60);
+    const sec = String(timeLeft % 60).padStart(2, "0");
+    document.getElementById("timer").textContent = `Tempo: ${min}:${sec}`;
   }
 
-  function gerarElementos() {
-    const board = document.getElementById('shadow-board');
-    const piecesContainer = document.getElementById('pieces');
-    board.innerHTML = '';
-    piecesContainer.innerHTML = '';
-
-    perguntas.forEach(p => {
-      const slot = document.createElement('div');
-      slot.className = 'shadow-slot';
-      slot.dataset.perguntaOriginal = p.pergunta;
-      slot.dataset.respostaCorreta = p.resposta;
-      slot.innerHTML = `<span>${p.pergunta}</span>`;
-      slot.addEventListener('dragover', e => e.preventDefault());
-      slot.addEventListener('drop', soltarPeca);
-      board.appendChild(slot);
-    });
-
-    const respostasMisturadas = [...perguntas].map(p => p.resposta).sort(() => Math.random() - 0.5);
-    respostasMisturadas.forEach(resp => {
-      const piece = document.createElement('div');
-      piece.className = 'piece';
-      piece.textContent = resp;
-      piece.draggable = true;
-      piece.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', resp));
-      piecesContainer.appendChild(piece);
-    });
-  }
-
-  function soltarPeca(e) {
-    e.preventDefault();
-    const respostaArrastada = e.dataTransfer.getData('text/plain');
-    const slot = e.currentTarget;
-    if(slot.dataset.respostaUsuario) return;
-
-    const allPieces = document.querySelectorAll('.piece');
-    let pecaOriginal;
-    for(let p of allPieces) {
-      if(p.textContent === respostaArrastada && !p.classList.contains('used')) {
-        pecaOriginal = p;
-        break;
-      }
-    }
-    if(pecaOriginal) {
-      slot.dataset.respostaUsuario = respostaArrastada;
-      slot.innerHTML = `
-        <span>${slot.dataset.perguntaOriginal}</span>
-        <div class="resposta-encaixada">${respostaArrastada}</div>
-        <div class="remove-icon" onclick="removerResposta(this)">X</div>
-      `;
-      slot.querySelector('.remove-icon').style.display = 'block';
-      pecaOriginal.classList.add('used');
-      pecaOriginal.draggable = false;
-    }
-  }
-
-  function removerResposta(btn) {
-    const slot = btn.parentElement;
-    const respostaRemovida = slot.dataset.respostaUsuario;
-    delete slot.dataset.respostaUsuario;
-    slot.innerHTML = `<span>${slot.dataset.perguntaOriginal}</span>`;
-    const allPieces = document.querySelectorAll('.piece');
-    for(let p of allPieces) {
-      if(p.textContent === respostaRemovida && p.classList.contains('used')) {
-        p.classList.remove('used');
-        p.draggable = true;
-        break;
-      }
-    }
-  }
-
-  /* ================= VERIFICAÇÃO E GABARITO (SEM PENALIDADE) ================= */
-  function verificar() {
-    clearInterval(timerInterval);
-    
-    let acertos = 0;
-    let erros = 0;
-    let htmlGabarito = "";
-
-    const slots = document.querySelectorAll('.shadow-slot');
-    
-    slots.forEach(slot => {
-      const correta = slot.dataset.respostaCorreta;
-      const usuario = slot.dataset.respostaUsuario;
-
-      if(usuario === correta) {
-        acertos++;
-      } else {
-        erros++;
-        // Prepara o gabarito visual dos erros
-        const respExibida = usuario ? usuario : "<span style='color:#e74c3c'>(Sem resposta)</span>";
-        htmlGabarito += `
-          <div class="gabarito-row erro">
-            <div class="gabarito-texto">
-              <div style="margin-bottom:4px">${slot.dataset.perguntaOriginal}</div>
-              <span class="gabarito-label">Você colocou:</span> ${respExibida}<br>
-              <span class="gabarito-label" style="color:#27ae60">Correta:</span> <strong>${correta}</strong>
-            </div>
-            <div style="font-size:1.5em">❌</div>
-          </div>
-        `;
-      }
-    });
-
-    // Salva Pontuação e Tempo (SEM PENALIDADE)
-    const tempoGasto = totalTime - timeLeft;
-    scores[currentPlayerIndex] = acertos;
-    times[currentPlayerIndex] = tempoGasto;
-
-    // Troca a visualização para o Resultado
-    document.getElementById('game-play-container').style.display = 'none';
-    const resContainer = document.getElementById('result-container');
-    resContainer.style.display = 'block';
-
-    // Cabeçalho
-    document.getElementById('score-header').innerHTML = `
-        <h3>Você acertou ${acertos} de ${perguntas.length}</h3>
-        <p>Tempo: <strong>${tempoGasto}s</strong></p>
-    `;
-    
-    // Lista de Erros
-    const divLista = document.getElementById('gabarito-lista');
-    if(erros === 0) {
-      divLista.innerHTML = '<div class="gabarito-row acerto" style="justify-content:center; font-weight:bold;">🎉 PARABÉNS! VOCÊ GABARITOU! 🎉</div>';
-    } else {
-      divLista.innerHTML = '<h4 style="margin-top:0">Onde você errou:</h4>' + htmlGabarito;
-    }
-    
-    // Botão Continuar
-    const btnCont = document.getElementById('btn-continuar');
-    if(currentPlayerIndex < players.length - 1) {
-      btnCont.textContent = `Próximo Jogador (${players[currentPlayerIndex+1]}) ➡`;
-    } else {
-      btnCont.textContent = "Ver Ranking Final 🏆";
-    }
-  }
-
-  function avancarProximoJogador() {
+  function proximaRodada() {
     currentPlayerIndex++;
-    if(currentPlayerIndex < players.length) {
-      carregarRodada();
+    if (currentPlayerIndex < players.length) {
+      iniciarRodada();
     } else {
-      mostrarRankingFinal();
+      mostrarRanking();
     }
   }
 
-  function mostrarRankingFinal() {
-    document.getElementById('game-area').style.display = 'none';
-    const rankingDiv = document.getElementById('ranking');
-    rankingDiv.style.display = 'block';
-    
-    let dadosRanking = players.map((nome, i) => {
-      return { nome: nome, pontos: scores[i], tempo: times[i] };
+  function mostrarRanking() {
+    const rankingDiv = document.getElementById("ranking");
+    rankingDiv.style.display = "block";
+    rankingDiv.innerHTML = "<h2>🏆 Ranking Final</h2>";
+
+    const ranking =
+      players.map((p, i) => ({ nome: p, pontos: scores[i], tempo: times[i] }))
+      .sort((a, b) => {
+        if (b.pontos !== a.pontos) return b.pontos - a.pontos;
+        return a.tempo - b.tempo;
+      });
+
+    ranking.forEach((r, i) => {
+      const tempoStr = r.tempo > 0 ? `(${r.tempo}s)` : '(Tempo máximo)';
+      const palavraPontuacao = r.pontos === 1 ? 'ponto' : 'pontos';
+      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: <span class="rank-highlight">${r.pontos} ${palavraPontuacao}</span> ${tempoStr}</p>`;
     });
 
-    // Ordena: Mais Pontos > Menor Tempo
-    dadosRanking.sort((a, b) => {
-      if(b.pontos !== a.pontos) return b.pontos - a.pontos;
-      return a.tempo - b.tempo;
-    });
-
-    let html = '<h2 style="text-align:center; color:#2c3e50">🏆 Classificação Final</h2>';
-    dadosRanking.forEach((d, i) => {
-      let medalha = (i===0) ? "🥇" : (i===1 ? "🥈" : (i===2 ? "🥉" : `${i+1}º`));
-      html += `
-        <div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee; align-items:center;">
-          <div style="font-size:1.2em"><strong>${medalha} ${d.nome}</strong></div>
-          <div style="text-align:right">
-            <div style="color:#2980b9; font-weight:bold">${d.pontos} pts</div>
-            <div style="color:#7f8c8d; font-size:0.9em">${d.tempo}s</div>
-          </div>
-        </div>
-      `;
-    });
-
-    html += '<br><button onclick="location.reload()" style="width:100%; padding:15px; background:#34495e; color:white; border:none; cursor:pointer; border-radius:5px;">Jogar Novamente</button>';
-    rankingDiv.innerHTML = html;
+    document.getElementById("game-area").style.display = "none";
   }
 </script>
 
