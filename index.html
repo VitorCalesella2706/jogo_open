@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Quiz de Encaixe</title>
+<title>Quiz de Encaixe - Engenharia de Superfície</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -23,7 +23,7 @@
 
   /* Melhorar leitura do título */
   h1 {
-     background-color: rgba(255, 255, 255, 0.9);
+     background-color: rgba(255, 255, 255, 0.95);
      display: inline-block;
      padding: 10px 25px;
      border-radius: 10px;
@@ -54,12 +54,15 @@
   #btn-som:hover { transform: scale(1.05); }
   #btn-som.tocando { background-color: #2ecc71; }
 
+  /* CONFIG (Tela Inicial) */
   .config { 
     margin-bottom: 20px; 
-    background: rgba(255,255,255,0.9);
-    padding: 20px;
+    background: rgba(255,255,255,0.95);
+    padding: 30px;
     border-radius: 10px;
     display: inline-block;
+    max-width: 800px; /* Limita a largura para o texto não ficar muito esticado */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   }
   
   #game-area { display: none; }
@@ -280,6 +283,11 @@
   <div id="names"></div>
   <br>
   <button onclick="prepararJogo()" style="padding: 10px 25px; font-size: 1.1em; background-color:#2980b9; color:white; border:none; border-radius:5px; cursor:pointer;">Iniciar Jogo</button>
+
+  <div style="margin-top: 25px; font-size: 0.9em; color: #555; text-align: justify; line-height: 1.6; border-top: 1px solid #ccc; padding-top: 15px;">
+    <p>Este software de simulação, desenvolvido por estudantes da <strong>Engenharia de Manufatura</strong>, foi concebido como um trabalho prático na disciplina de <strong>Engenharia de Superfície</strong>. O objetivo central é fornecer uma plataforma interativa para o estudo e aplicação dos princípios que regem a camada superficial dos materiais, uma área crítica para a durabilidade e funcionalidade de componentes.</p>
+    <p>O jogo foca em demonstrar o impacto direto da seleção de materiais e técnicas de Tratamento de Superfície (como deposição, endurecimento e acabamento) em fenômenos como desgaste, atrito e corrosão. Ao simular condições operacionais diversas, ele permite que o usuário explore as consequências práticas das decisões de projeto baseadas em conceitos essenciais da ciência dos materiais.</p>
+  </div>
 </div>
 
 <div id="game-area">
@@ -469,7 +477,7 @@
 
     const respostasMisturadas = [...perguntas].map(p => p.resposta).sort(() => Math.random() - 0.5);
     respostasMisturadas.forEach(resp => {
-      const piece = document.createElement('div');
+      const piece = document.createElement("div");
       piece.className = 'piece';
       piece.textContent = resp;
       piece.draggable = true;
@@ -520,7 +528,7 @@
     }
   }
 
-  /* ================= VERIFICAÇÃO E GABARITO (SEM PENALIDADE) ================= */
+  /* ================= VERIFICAÇÃO E GABARITO ================= */
   function verificar() {
     clearInterval(timerInterval);
     
@@ -553,7 +561,7 @@
       }
     });
 
-    // Salva Pontuação e Tempo (SEM PENALIDADE)
+    // Salva Pontuação e Tempo
     const tempoGasto = totalTime - timeLeft;
     scores[currentPlayerIndex] = acertos;
     times[currentPlayerIndex] = tempoGasto;
