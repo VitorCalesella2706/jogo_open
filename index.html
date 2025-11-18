@@ -6,16 +6,38 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    background-color: #f0f3f7;
+    background-color: #f0f3f7; /* Cor padrão antes de iniciar */
     text-align: center;
     padding: 20px;
+    transition: background 0.5s ease; /* Suaviza a troca de fundo */
   }
 
-  h1 { color: #2c3e50; }
+  /* 🌟 NOVO: Classe para o fundo com GIF */
+  body.fundo-animado {
+    background-image: url('imagem.gif');
+    background-size: cover;      /* Cobre a tela toda */
+    background-position: center; /* Centraliza */
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* O fundo fica parado enquanto a tela rola */
+  }
+
+  /* Para garantir que o título fique legível em cima do GIF, adicionamos sombra */
+  h1, h2, #timer, #result {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); 
+  }
+  
+  /* Fundo branco semitransparente atrás do título para ajudar a leitura */
+  h1 {
+     background-color: rgba(255, 255, 255, 0.8);
+     display: inline-block;
+     padding: 10px 20px;
+     border-radius: 10px;
+  }
+
   .config { margin-bottom: 20px; }
   #game-area { display: none; }
 
-  /* --- 🔊 ESTILO DO BOTÃO DE SOM (Corrigido) --- */
+  /* --- 🔊 ESTILO DO BOTÃO DE SOM --- */
   #btn-som {
     position: fixed;
     top: 15px;
@@ -24,23 +46,23 @@
     font-size: 16px;
     font-weight: bold;
     color: white;
-    background-color: #e74c3c; /* Vermelho (Desligado) inicial */
+    background-color: #e74c3c;
     border: none;
     border-radius: 50px;
     cursor: pointer;
-    z-index: 2000; /* Garante que fique ACIMA do modal */
+    z-index: 2000;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     transition: all 0.3s ease;
   }
   
   #btn-som.tocando {
-    background-color: #2ecc71; /* Verde quando tocando */
+    background-color: #2ecc71;
   }
   
   #btn-som:hover {
     transform: scale(1.05);
   }
-  /* --------------------------------------------- */
+  /* --------------------------------- */
 
   #shadow-board, #pieces {
     display: flex;
@@ -53,8 +75,8 @@
   .shadow-slot {
     width: 250px; 
     height: 60px;
-    border: 2px dashed #ccc;
-    background-color: #ecf0f1;
+    border: 2px dashed #555; /* Borda mais escura para contraste */
+    background-color: rgba(236, 240, 241, 0.95); /* Fundo quase sólido para leitura */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -64,6 +86,7 @@
     padding-left: 5px; 
     text-align: left; 
     font-size: 0.85em; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   }
 
   .remove-icon {
@@ -104,28 +127,46 @@
     justify-content: center;
     cursor: grab;
     font-size: 0.9em; 
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3); /* Sombra para destacar do fundo */
+    border: 1px solid #2980b9;
   }
 
   .piece.used {
     background-color: #7f8c8d;
     cursor: not-allowed;
+    box-shadow: none;
   }
 
   #timer {
-    font-size: 20px;
-    color: #e74c3c;
+    font-size: 24px;
+    color: #fff; /* Texto branco para contrastar com fundo */
+    background-color: #e74c3c;
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: inline-block;
     margin: 10px;
+    font-weight: bold;
   }
 
   #result {
     font-weight: bold;
     margin-top: 20px;
     font-size: 18px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    display: inline-block;
   }
 
   #ranking {
     margin-top: 20px;
     display: none;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .rank-highlight { font-weight: bold; }
@@ -140,6 +181,7 @@
     border-radius: 6px;
     text-decoration: none;
     z-index: 1500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
   #player-name-modal { display: none; }
@@ -151,7 +193,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); 
+    background-color: rgba(0, 0, 0, 0.85); /* Mais escuro para focar */
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -173,6 +215,7 @@
     border-bottom: 2px solid #bdc3c7;
     padding-bottom: 10px;
     text-align: center;
+    text-shadow: none; /* Remove sombra dentro do modal */
   }
 
   #rules-text h3 { color: #3498db; margin-top: 20px; }
@@ -213,7 +256,7 @@
 
 <audio id="musica-fundo" loop>
     <source src="dark.mp4" type="audio/mp4">
-    </audio>
+</audio>
 
 <button id="btn-som" onclick="alternarSom()">🔇 Som Desligado</button>
 
@@ -222,7 +265,7 @@
 <h1 id="game-title">Quiz de Encaixe - Modo Single Player</h1>
 
 <div class="config">
-  <label>Modo de jogo:</label>
+  <label style="background: rgba(255,255,255,0.8); padding: 5px; border-radius: 4px;">Modo de jogo:</label>
   <select id="numPlayers" onchange="updateTitle()">
     <option value="1">Single Player</option>
     <option value="2">2 Jogadores</option>
@@ -230,15 +273,18 @@
     <option value="4">4 Jogadores</option>
   </select>
   <div id="names"></div>
-  <button onclick="startGame()">Iniciar Jogo</button>
+  <br><br>
+  <button onclick="startGame()" style="padding: 10px 20px; font-size: 1.2em; cursor: pointer;">Iniciar Jogo</button>
 </div>
 
 <div id="game-area">
-  <h2 id="currentPlayer"></h2>
+  <h2 id="currentPlayer" style="background: rgba(255,255,255,0.8); display:inline-block; padding: 5px 15px; border-radius: 10px;"></h2>
+  <br>
   <div id="timer">Tempo: 5:00</div>
   <div id="shadow-board"></div>
   <div id="pieces"></div>
-  <button id="verify" onclick="verificar()">Finalizar Tentativa</button>
+  <button id="verify" onclick="verificar()" style="padding: 10px 20px; font-size: 1.1em; cursor: pointer; background-color: #f1c40f; border: none; border-radius: 5px; color: #000; font-weight: bold;">Finalizar Tentativa</button>
+  <br>
   <div id="result"></div>
 </div>
 
@@ -274,13 +320,10 @@
 
     if (audio.paused) {
       audio.play().then(() => {
-        // Sucesso ao tocar
         botao.innerHTML = "🔊 Som Ligado";
         botao.classList.add("tocando");
       }).catch(error => {
-        // Erro (provavelmente arquivo não encontrado)
         console.log("Erro ao tocar:", error);
-        alert("Erro: Não foi possível tocar o arquivo 'dark.mp4'. Verifique se ele está na pasta.");
       });
     } else {
       audio.pause();
@@ -288,7 +331,12 @@
       botao.classList.remove("tocando");
     }
   }
-  /* ------------------------- */
+
+  /* --- 🖼️ FUNÇÃO PARA ATIVAR O FUNDO GIF --- */
+  function ativarFundo() {
+      document.body.classList.add('fundo-animado');
+  }
+  /* ----------------------------------------- */
 
   const perguntas = [
     { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
@@ -324,28 +372,27 @@
   }
 
   function startGame() {
-    // Tenta ligar o som automaticamente ao iniciar, mas se falhar, o botão resolve
+    // Tenta som
     const audio = document.getElementById('musica-fundo');
     const botao = document.getElementById('btn-som');
-    
-    // Tenta dar play
     audio.play().then(() => {
        botao.innerHTML = "🔊 Som Ligado";
        botao.classList.add("tocando");
-    }).catch(() => {
-       console.log("Autoplay bloqueado, usuário deve clicar no botão.");
-    });
+    }).catch(() => { console.log("Autoplay bloqueado"); });
 
     selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
-    document.querySelector(".config").style.display = "none";
-
+    
+    // Se for single player, já ativa o fundo aqui
     if (selectedNumPlayers === 1) {
+        ativarFundo(); // <--- ATIVA O GIF
         players = ["Jogador"];
         scores = [0];
         times = [totalTime];
+        document.querySelector(".config").style.display = "none";
         document.getElementById("game-area").style.display = "block";
         iniciarRodada();
     } else {
+        document.querySelector(".config").style.display = "none";
         showNameModal(selectedNumPlayers);
     }
   }
@@ -367,20 +414,16 @@
       for (let i = 1; i <= num; i++) {
           const group = document.createElement('div');
           group.className = 'player-input-group';
-          
           const label = document.createElement('label');
           label.textContent = `Nome do Jogador ${i}:`;
-
           const input = document.createElement('input');
           input.type = 'text';
           input.id = `player${i}`;
           input.placeholder = `Nome do Jogador ${i}`;
-          
           group.appendChild(label);
           group.appendChild(input);
           namesForm.appendChild(group);
       }
-
       document.getElementById("player-name-modal").style.display = "flex";
   }
 
@@ -389,22 +432,22 @@
       for (let i = 1; i <= selectedNumPlayers; i++) {
           const inputElement = document.getElementById(`player${i}`);
           let name = inputElement.value.trim();
-          if (name === "") {
-              name = `Jogador ${i}`;
-          }
+          if (name === "") { name = `Jogador ${i}`; }
           players.push(name);
       }
-
       scores = new Array(selectedNumPlayers).fill(0);
       times = new Array(selectedNumPlayers).fill(0); 
       
       document.getElementById("player-name-modal").style.display = "none";
       document.getElementById("game-area").style.display = "block";
+      
+      ativarFundo(); // <--- ATIVA O GIF AQUI NO MULTIPLAYER
       iniciarRodada();
   }
   
   function iniciarRodada() {
     document.getElementById("result").textContent = "";
+    document.getElementById("result").style.display = "none"; // Esconde resultado antigo
     const currentPlayer = players[currentPlayerIndex];
     document.getElementById("currentPlayer").textContent = `Vez de: ${currentPlayer}`;
     gerarPerguntas();
@@ -423,17 +466,12 @@
       slot.dataset.resposta = p.resposta;
       slot.textContent = p.pergunta; 
       slot.dataset.pergunta = p.pergunta; 
-
       slot.addEventListener("dragover", e => e.preventDefault());
       slot.addEventListener("drop", soltar);
-      
       shadowBoard.appendChild(slot);
     });
 
-    const respostasEmbaralhadas = [...perguntas]
-      .sort(() => Math.random() - 0.5)
-      .map(p => p.resposta);
-
+    const respostasEmbaralhadas = [...perguntas].sort(() => Math.random() - 0.5).map(p => p.resposta);
     respostasEmbaralhadas.forEach(resp => {
       const piece = document.createElement("div");
       piece.className = "piece";
@@ -458,11 +496,12 @@
 
       const answerText = document.createElement('span');
       answerText.textContent = ` → ${resposta}`;
+      answerText.style.fontWeight = "bold";
+      answerText.style.color = "#2980b9";
 
       const removeIcon = document.createElement('span');
       removeIcon.textContent = 'X';
       removeIcon.classList.add('remove-icon');
-      
       removeIcon.addEventListener('click', (event) => {
         event.stopPropagation(); 
         removerResposta(slot);
@@ -482,17 +521,13 @@
   function removerResposta(slot) {
     const respostaAntiga = slot.dataset.userAnswer;
     if (!respostaAntiga) return;
-
     const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === respostaAntiga);
-
     if (piece) {
       piece.classList.remove("used");
       piece.draggable = true;
     }
-
     slot.innerHTML = ''; 
     slot.textContent = slot.dataset.pergunta;
-
     delete slot.dataset.userAnswer;
     slot.classList.remove("correct", "wrong");
   }
@@ -517,8 +552,9 @@
     times[currentPlayerIndex] = totalTime - timeLeft; 
     
     const palavraPontuacao = acertos === 1 ? 'ponto' : 'pontos';
-    
-    document.getElementById("result").textContent = `Você acertou ${acertos} de ${perguntas.length}! Pontuação: ${acertos} ${palavraPontuacao}.`;
+    const resultDiv = document.getElementById("result");
+    resultDiv.textContent = `Você acertou ${acertos} de ${perguntas.length}! Pontuação: ${acertos} ${palavraPontuacao}.`;
+    resultDiv.style.display = "inline-block";
 
     clearInterval(timerInterval);
     setTimeout(proximaRodada, 4000);
@@ -568,7 +604,6 @@
     ranking.forEach((r, i) => {
       const tempoStr = r.tempo > 0 ? `(${r.tempo}s)` : '(Tempo máximo)';
       const palavraPontuacao = r.pontos === 1 ? 'ponto' : 'pontos';
-
       rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: <span class="rank-highlight">${r.pontos} ${palavraPontuacao}</span> ${tempoStr}</p>`;
     });
 
