@@ -126,25 +126,6 @@
     border-radius: 6px;
     text-decoration: none;
   }
-  /* 🔊 NOVO: Estilo para o botão de música */
-  #music-toggle {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    background-color: #f39c12; /* Laranja */
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.2s;
-  }
-
-  #music-toggle:hover {
-    background-color: #e67e22; /* Laranja mais escuro */
-  }
-  /* ⬆️ FIM NOVO */
 
   #player-name-modal { 
     display: none;
@@ -230,7 +211,7 @@
 <body>
 
 <a href="#" class="back-button" onclick="location.reload()">← Reiniciar</a>
-<button id="music-toggle" onclick="toggleMusic()">🔊 Música Ligada</button>
+
 <h1 id="game-title">Quiz de Encaixe - Modo Single Player</h1>
 
 <div class="config">
@@ -313,18 +294,11 @@
       document.querySelector(".config").style.display = "block"; 
   }
 
-  /* ⬇️⬇️ MODIFICADO - Tentativa de iniciar música */
+  /* ⬇️⬇️ NOVO — toca a música de fundo ao iniciar o jogo */
   function startGame() {
-    try {
-      const bgm = document.getElementById("bgm");
-      if (bgm.paused) {
-        bgm.play().catch(() => {
-            console.log("A reprodução automática da música foi bloqueada. Clique no botão de música para iniciar.");
-        });
-      }
-    } catch (e) {
-      console.error("Erro ao tentar tocar música:", e);
-    }
+    document.getElementById("bgm").play().catch(() => {
+        console.log("A música será liberada após interação do usuário.");
+    });
   /* ⬆️⬆️ */
 
     selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
@@ -565,25 +539,9 @@
 
     document.getElementById("game-area").style.display = "none";
   }
-
-  /* ⬇️⬇️ NOVO: Funções para controlar a música */
-  function toggleMusic() {
-      const bgm = document.getElementById("bgm");
-      const button = document.getElementById("music-toggle");
-      if (bgm.paused) {
-          bgm.play().catch(e => {
-            console.error("Falha ao tentar tocar a música:", e);
-            alert("Não foi possível iniciar a música. O navegador pode ter bloqueado a reprodução automática.");
-          });
-          button.textContent = "🔊 Música Ligada";
-      } else {
-          bgm.pause();
-          button.textContent = "🔇 Música Desligada";
-      }
-  }
-  /* ⬆️ FIM NOVO */
 </script>
 
+<!-- 🔊 MÚSICA DE FUNDO -->
 <audio id="bgm" src="dark.mp4" loop></audio>
 
 </body>
