@@ -6,38 +6,41 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    background-color: #f0f3f7; /* Cor padrão antes de iniciar */
+    background-color: #f0f3f7;
     text-align: center;
     padding: 20px;
-    transition: background 0.5s ease; /* Suaviza a troca de fundo */
+    transition: background 0.5s ease;
+    /* Padding extra no final para caber o gabarito */
+    padding-bottom: 100px; 
   }
 
-  /* 🌟 NOVO: Classe para o fundo com GIF */
+  /* 🌟 Fundo com GIF */
   body.fundo-animado {
     background-image: url('imagem.gif');
-    background-size: cover;      /* Cobre a tela toda */
-    background-position: center; /* Centraliza */
+    background-size: cover;
+    background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed; /* O fundo fica parado enquanto a tela rola */
+    background-attachment: fixed;
   }
 
-  /* Para garantir que o título fique legível em cima do GIF, adicionamos sombra */
-  h1, h2, #timer, #result {
+  /* Sombra nos textos para leitura sobre o GIF */
+  h1, h2, #timer {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); 
   }
   
-  /* Fundo branco semitransparente atrás do título para ajudar a leitura */
   h1 {
      background-color: rgba(255, 255, 255, 0.8);
      display: inline-block;
      padding: 10px 20px;
      border-radius: 10px;
+     text-shadow: none; /* Remove sombra dentro do box branco */
+     color: #2c3e50;
   }
 
   .config { margin-bottom: 20px; }
   #game-area { display: none; }
 
-  /* --- 🔊 ESTILO DO BOTÃO DE SOM --- */
+  /* --- 🔊 BOTÃO DE SOM --- */
   #btn-som {
     position: fixed;
     top: 15px;
@@ -54,16 +57,10 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     transition: all 0.3s ease;
   }
-  
-  #btn-som.tocando {
-    background-color: #2ecc71;
-  }
-  
-  #btn-som:hover {
-    transform: scale(1.05);
-  }
-  /* --------------------------------- */
+  #btn-som.tocando { background-color: #2ecc71; }
+  #btn-som:hover { transform: scale(1.05); }
 
+  /* --- 🧩 ÁREA DO JOGO --- */
   #shadow-board, #pieces {
     display: flex;
     flex-wrap: wrap;
@@ -75,8 +72,8 @@
   .shadow-slot {
     width: 250px; 
     height: 60px;
-    border: 2px dashed #555; /* Borda mais escura para contraste */
-    background-color: rgba(236, 240, 241, 0.95); /* Fundo quase sólido para leitura */
+    border: 2px dashed #555;
+    background-color: rgba(236, 240, 241, 0.95);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -100,7 +97,6 @@
     font-size: 1.2em;
     padding: 0 5px;
     border-radius: 50%;
-    transition: background-color 0.2s;
   }
   
   .shadow-slot span {
@@ -112,9 +108,8 @@
       line-height: 1.2;
   }
 
-  .remove-icon:hover { background-color: rgba(231, 76, 60, 0.2); }
-  .shadow-slot.correct { background-color: #a8e6a3; }
-  .shadow-slot.wrong { background-color: #f5a3a3; }
+  .shadow-slot.correct { background-color: #a8e6a3; border-color: #27ae60; }
+  .shadow-slot.wrong { background-color: #f5a3a3; border-color: #c0392b; }
 
   .piece {
     width: 150px; 
@@ -127,7 +122,7 @@
     justify-content: center;
     cursor: grab;
     font-size: 0.9em; 
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.3); /* Sombra para destacar do fundo */
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     border: 1px solid #2980b9;
   }
 
@@ -139,7 +134,7 @@
 
   #timer {
     font-size: 24px;
-    color: #fff; /* Texto branco para contrastar com fundo */
+    color: #fff;
     background-color: #e74c3c;
     padding: 5px 15px;
     border-radius: 20px;
@@ -148,15 +143,62 @@
     font-weight: bold;
   }
 
-  #result {
-    font-weight: bold;
-    margin-top: 20px;
-    font-size: 18px;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 10px;
-    border-radius: 8px;
-    display: inline-block;
+  /* --- 📝 RESULTADO E GABARITO --- */
+  #result-container {
+    display: none; /* Escondido inicialmente */
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 20px auto;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    text-align: left;
   }
+
+  #result-score {
+    font-size: 1.4em;
+    font-weight: bold;
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+  }
+
+  .gabarito-item {
+    margin-bottom: 12px;
+    padding: 10px;
+    background-color: #fff0f0;
+    border-left: 5px solid #e74c3c;
+    border-radius: 4px;
+    font-size: 0.95em;
+  }
+
+  .gabarito-pergunta {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+  }
+
+  .gabarito-errada { color: #c0392b; text-decoration: line-through; margin-right: 10px; }
+  .gabarito-correta { color: #27ae60; font-weight: bold; }
+
+  #btn-continuar {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1em;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  #btn-continuar:hover { background-color: #2980b9; }
+  /* --------------------------- */
 
   #ranking {
     margin-top: 20px;
@@ -184,6 +226,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
 
+  /* Modais */
   #player-name-modal { display: none; }
   #rules-modal { display: flex; }
 
@@ -193,7 +236,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.85); /* Mais escuro para focar */
+    background-color: rgba(0, 0, 0, 0.85);
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -208,34 +251,12 @@
     max-width: 400px;
     text-align: left;
   }
-
-  .modal-content h2 {
-    color: #2c3e50;
-    margin-top: 0;
-    border-bottom: 2px solid #bdc3c7;
-    padding-bottom: 10px;
-    text-align: center;
-    text-shadow: none; /* Remove sombra dentro do modal */
-  }
-
-  #rules-text h3 { color: #3498db; margin-top: 20px; }
-  #rules-text ul { padding-left: 20px; }
-
+  
+  .modal-content h2 { text-align: center; border-bottom: 2px solid #bdc3c7; padding-bottom: 10px; margin-top: 0; color: #2c3e50; }
+  
   .player-input-group { margin-bottom: 15px; }
-  .player-input-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #34495e;
-  }
-
-  .player-input-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box; 
-  }
+  .player-input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #34495e; }
+  .player-input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
 
   #submitNames, #closeRules {
     width: 100%;
@@ -246,9 +267,7 @@
     border-radius: 5px;
     font-size: 1.1em;
     cursor: pointer;
-    transition: background-color 0.2s;
   }
-
   #submitNames:hover, #closeRules:hover { background-color: #27ae60; }
 </style>
 </head>
@@ -281,11 +300,17 @@
   <h2 id="currentPlayer" style="background: rgba(255,255,255,0.8); display:inline-block; padding: 5px 15px; border-radius: 10px;"></h2>
   <br>
   <div id="timer">Tempo: 5:00</div>
+  
   <div id="shadow-board"></div>
   <div id="pieces"></div>
+  
   <button id="verify" onclick="verificar()" style="padding: 10px 20px; font-size: 1.1em; cursor: pointer; background-color: #f1c40f; border: none; border-radius: 5px; color: #000; font-weight: bold;">Finalizar Tentativa</button>
-  <br>
-  <div id="result"></div>
+  
+  <div id="result-container">
+      <div id="result-score"></div>
+      <div id="gabarito-lista"></div>
+      <button id="btn-continuar" onclick="proximaRodada()">Continuar / Próximo Jogador</button>
+  </div>
 </div>
 
 <div id="ranking"></div>
@@ -298,6 +323,7 @@
       <h3>Como Funciona a Pontuação?</h3>
       <ul>
         <li>1 ponto por resposta correta.</li>
+        <li><strong>Penalidade:</strong> +4 segundos no tempo final por erro!</li>
       </ul>
     </div>
     <button id="closeRules" onclick="closeRulesAndShowConfig()">Entendi! Começar Jogo</button>
@@ -313,18 +339,15 @@
 </div>
 
 <script>
-  /* --- 🔊 FUNÇÃO DE SOM --- */
+  /* --- 🔊 SOM --- */
   function alternarSom() {
     const audio = document.getElementById('musica-fundo');
     const botao = document.getElementById('btn-som');
-
     if (audio.paused) {
       audio.play().then(() => {
         botao.innerHTML = "🔊 Som Ligado";
         botao.classList.add("tocando");
-      }).catch(error => {
-        console.log("Erro ao tocar:", error);
-      });
+      }).catch(e => alert("Erro ao tocar áudio."));
     } else {
       audio.pause();
       botao.innerHTML = "🔇 Som Desligado";
@@ -332,12 +355,10 @@
     }
   }
 
-  /* --- 🖼️ FUNÇÃO PARA ATIVAR O FUNDO GIF --- */
-  function ativarFundo() {
-      document.body.classList.add('fundo-animado');
-  }
-  /* ----------------------------------------- */
+  /* --- 🖼️ FUNDO --- */
+  function ativarFundo() { document.body.classList.add('fundo-animado'); }
 
+  /* --- DADOS DO JOGO --- */
   const perguntas = [
     { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
     { pergunta: "Corrente elétrica deposita camada metálica sobre a superfície.", resposta: "Eletrodeposição" },
@@ -363,7 +384,6 @@
   let timerInterval;
   let totalTime = 300; 
   let timeLeft = totalTime; 
-
   let selectedNumPlayers = 1;
 
   function closeRulesAndShowConfig() {
@@ -372,22 +392,20 @@
   }
 
   function startGame() {
-    // Tenta som
     const audio = document.getElementById('musica-fundo');
     const botao = document.getElementById('btn-som');
     audio.play().then(() => {
        botao.innerHTML = "🔊 Som Ligado";
        botao.classList.add("tocando");
-    }).catch(() => { console.log("Autoplay bloqueado"); });
+    }).catch(() => {});
 
     selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
     
-    // Se for single player, já ativa o fundo aqui
     if (selectedNumPlayers === 1) {
-        ativarFundo(); // <--- ATIVA O GIF
+        ativarFundo(); 
         players = ["Jogador"];
         scores = [0];
-        times = [totalTime];
+        times = [0];
         document.querySelector(".config").style.display = "none";
         document.getElementById("game-area").style.display = "block";
         iniciarRodada();
@@ -399,30 +417,18 @@
 
   function updateTitle() {
     selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
-    const gameTitle = document.getElementById("game-title");
-    if (selectedNumPlayers === 1) {
-      gameTitle.textContent = "Quiz de Encaixe - Modo Single Player";
-    } else {
-      gameTitle.textContent = "Quiz de Encaixe - Modo Multiplayer";
-    }
+    const t = document.getElementById("game-title");
+    t.textContent = selectedNumPlayers === 1 ? "Quiz de Encaixe - Modo Single Player" : "Quiz de Encaixe - Modo Multiplayer";
   }
 
   function showNameModal(num) {
-      const namesForm = document.getElementById("names-form");
-      namesForm.innerHTML = "";
-      
+      const form = document.getElementById("names-form");
+      form.innerHTML = "";
       for (let i = 1; i <= num; i++) {
-          const group = document.createElement('div');
-          group.className = 'player-input-group';
-          const label = document.createElement('label');
-          label.textContent = `Nome do Jogador ${i}:`;
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.id = `player${i}`;
-          input.placeholder = `Nome do Jogador ${i}`;
-          group.appendChild(label);
-          group.appendChild(input);
-          namesForm.appendChild(group);
+          const d = document.createElement('div');
+          d.className = 'player-input-group';
+          d.innerHTML = `<label>Nome Jogador ${i}:</label><input type="text" id="player${i}" placeholder="Nome Jogador ${i}">`;
+          form.appendChild(d);
       }
       document.getElementById("player-name-modal").style.display = "flex";
   }
@@ -430,24 +436,23 @@
   function submitNames() {
       players = [];
       for (let i = 1; i <= selectedNumPlayers; i++) {
-          const inputElement = document.getElementById(`player${i}`);
-          let name = inputElement.value.trim();
-          if (name === "") { name = `Jogador ${i}`; }
-          players.push(name);
+          let val = document.getElementById(`player${i}`).value.trim();
+          players.push(val === "" ? `Jogador ${i}` : val);
       }
       scores = new Array(selectedNumPlayers).fill(0);
       times = new Array(selectedNumPlayers).fill(0); 
-      
       document.getElementById("player-name-modal").style.display = "none";
       document.getElementById("game-area").style.display = "block";
-      
-      ativarFundo(); // <--- ATIVA O GIF AQUI NO MULTIPLAYER
+      ativarFundo();
       iniciarRodada();
   }
   
   function iniciarRodada() {
-    document.getElementById("result").textContent = "";
-    document.getElementById("result").style.display = "none"; // Esconde resultado antigo
+    document.getElementById("result-container").style.display = "none"; // Esconde o resultado anterior
+    document.getElementById("shadow-board").style.display = "flex";
+    document.getElementById("pieces").style.display = "flex";
+    document.getElementById("verify").style.display = "inline-block";
+
     const currentPlayer = players[currentPlayerIndex];
     document.getElementById("currentPlayer").textContent = `Vez de: ${currentPlayer}`;
     gerarPerguntas();
@@ -460,7 +465,7 @@
     shadowBoard.innerHTML = "";
     pieces.innerHTML = "";
 
-    perguntas.forEach((p, i) => {
+    perguntas.forEach((p) => {
       const slot = document.createElement("div");
       slot.className = "shadow-slot";
       slot.dataset.resposta = p.resposta;
@@ -471,15 +476,13 @@
       shadowBoard.appendChild(slot);
     });
 
-    const respostasEmbaralhadas = [...perguntas].sort(() => Math.random() - 0.5).map(p => p.resposta);
-    respostasEmbaralhadas.forEach(resp => {
+    const shuffled = [...perguntas].sort(() => Math.random() - 0.5).map(p => p.resposta);
+    shuffled.forEach(resp => {
       const piece = document.createElement("div");
       piece.className = "piece";
       piece.textContent = resp;
       piece.draggable = true;
-      piece.addEventListener("dragstart", e => {
-        e.dataTransfer.setData("text", resp);
-      });
+      piece.addEventListener("dragstart", e => e.dataTransfer.setData("text", resp));
       pieces.appendChild(piece);
     });
   }
@@ -491,27 +494,7 @@
     const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === resposta);
 
     if (slot && !slot.dataset.userAnswer) {
-      const questionText = document.createElement('span');
-      questionText.textContent = slot.dataset.pergunta;
-
-      const answerText = document.createElement('span');
-      answerText.textContent = ` → ${resposta}`;
-      answerText.style.fontWeight = "bold";
-      answerText.style.color = "#2980b9";
-
-      const removeIcon = document.createElement('span');
-      removeIcon.textContent = 'X';
-      removeIcon.classList.add('remove-icon');
-      removeIcon.addEventListener('click', (event) => {
-        event.stopPropagation(); 
-        removerResposta(slot);
-      });
-
-      slot.innerHTML = ''; 
-      slot.appendChild(questionText);
-      slot.appendChild(answerText);
-      slot.appendChild(removeIcon);
-      
+      slot.innerHTML = `<span>${slot.dataset.pergunta}</span><br><span style="color:#2980b9; font-weight:bold;"> → ${resposta}</span> <span class='remove-icon' onclick='event.stopPropagation(); removerResposta(this.parentNode)'>X</span>`;
       slot.dataset.userAnswer = resposta;
       piece.classList.add("used");
       piece.draggable = false;
@@ -519,45 +502,79 @@
   }
 
   function removerResposta(slot) {
-    const respostaAntiga = slot.dataset.userAnswer;
-    if (!respostaAntiga) return;
-    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === respostaAntiga);
-    if (piece) {
-      piece.classList.remove("used");
-      piece.draggable = true;
-    }
-    slot.innerHTML = ''; 
-    slot.textContent = slot.dataset.pergunta;
+    const antigo = slot.dataset.userAnswer;
+    if (!antigo) return;
+    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === antigo);
+    if (piece) { piece.classList.remove("used"); piece.draggable = true; }
+    slot.innerHTML = slot.dataset.pergunta;
     delete slot.dataset.userAnswer;
     slot.classList.remove("correct", "wrong");
   }
 
+  /* 🌟 LÓGICA PRINCIPAL DE VERIFICAÇÃO E GABARITO */
   function verificar() {
+    clearInterval(timerInterval);
     let acertos = 0;
+    let erros = 0;
+    let htmlErros = "";
+
     document.querySelectorAll(".shadow-slot").forEach(slot => {
       const correta = slot.dataset.resposta;
-      const resposta = slot.dataset.userAnswer;
+      const respostaUser = slot.dataset.userAnswer;
+      
       slot.classList.remove("correct", "wrong");
-      if (resposta) {
-        if (resposta === correta) {
-          acertos++;
-          slot.classList.add("correct");
-        } else {
-          slot.classList.add("wrong");
-        }
+
+      if (respostaUser === correta) {
+        acertos++;
+        slot.classList.add("correct");
+      } else {
+        // 🚩 Detectou erro: monta o HTML do gabarito
+        erros++;
+        slot.classList.add("wrong");
+        const respostaExibida = respostaUser ? respostaUser : "(Sem resposta)";
+        
+        htmlErros += `
+          <div class="gabarito-item">
+            <span class="gabarito-pergunta">${slot.dataset.pergunta}</span>
+            Você colocou: <span class="gabarito-errada">${respostaExibida}</span><br>
+            Correta: <span class="gabarito-correta">${correta}</span>
+          </div>
+        `;
       }
     });
 
-    scores[currentPlayerIndex] = acertos;
-    times[currentPlayerIndex] = totalTime - timeLeft; 
-    
-    const palavraPontuacao = acertos === 1 ? 'ponto' : 'pontos';
-    const resultDiv = document.getElementById("result");
-    resultDiv.textContent = `Você acertou ${acertos} de ${perguntas.length}! Pontuação: ${acertos} ${palavraPontuacao}.`;
-    resultDiv.style.display = "inline-block";
+    // Cálculo da Pontuação e Tempo com Penalidade
+    const tempoGasto = totalTime - timeLeft;
+    const penalidade = erros * 4; // 4 segundos por erro
+    const tempoFinal = tempoGasto + penalidade;
 
-    clearInterval(timerInterval);
-    setTimeout(proximaRodada, 4000);
+    scores[currentPlayerIndex] = acertos;
+    times[currentPlayerIndex] = tempoFinal; // Salva o tempo COM a penalidade
+
+    // Exibir Resultados
+    const scoreDiv = document.getElementById("result-score");
+    const gabaritoDiv = document.getElementById("gabarito-lista");
+    const resultContainer = document.getElementById("result-container");
+
+    // Esconde tabuleiro para focar no resultado
+    document.getElementById("shadow-board").style.display = "none";
+    document.getElementById("pieces").style.display = "none";
+    document.getElementById("verify").style.display = "none";
+
+    scoreDiv.innerHTML = `
+      Acertos: ${acertos} / ${perguntas.length}<br>
+      Tempo Gasto: ${tempoGasto}s <span style="color:#c0392b; font-size:0.8em;">(+${penalidade}s de penalidade)</span><br>
+      <strong>Tempo Final: ${tempoFinal}s</strong>
+    `;
+
+    if (erros > 0) {
+      gabaritoDiv.innerHTML = "<h3>❌ Correção dos Erros:</h3>" + htmlErros;
+    } else {
+      gabaritoDiv.innerHTML = "<h3 style='color:#27ae60'>🎉 Parabéns! Gabaritou!</h3>";
+    }
+
+    resultContainer.style.display = "block";
+    // O jogo agora PAUSA aqui até clicar em "Continuar"
   }
 
   function resetTimer() {
@@ -590,24 +607,33 @@
   }
 
   function mostrarRanking() {
+    document.getElementById("game-area").style.display = "none"; // Esconde área de jogo e resultado
     const rankingDiv = document.getElementById("ranking");
     rankingDiv.style.display = "block";
-    rankingDiv.innerHTML = "<h2>🏆 Ranking Final</h2>";
+    rankingDiv.innerHTML = "<h2>🏆 Ranking Final</h2><p style='font-size:0.9em; color:#555;'>Critério: Mais acertos, depois menor tempo (incluindo penalidades).</p>";
 
-    const ranking =
-      players.map((p, i) => ({ nome: p, pontos: scores[i], tempo: times[i] }))
+    const ranking = players.map((p, i) => ({ 
+        nome: p, 
+        pontos: scores[i], 
+        tempo: times[i] 
+      }))
       .sort((a, b) => {
-        if (b.pontos !== a.pontos) return b.pontos - a.pontos;
-        return a.tempo - b.tempo;
+        if (b.pontos !== a.pontos) return b.pontos - a.pontos; // Quem tem mais pontos ganha
+        return a.tempo - b.tempo; // Quem tem menor tempo ganha
       });
 
     ranking.forEach((r, i) => {
-      const tempoStr = r.tempo > 0 ? `(${r.tempo}s)` : '(Tempo máximo)';
-      const palavraPontuacao = r.pontos === 1 ? 'ponto' : 'pontos';
-      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: <span class="rank-highlight">${r.pontos} ${palavraPontuacao}</span> ${tempoStr}</p>`;
-    });
+      const tempoStr = `(${r.tempo}s)`;
+      const pontoStr = r.pontos === 1 ? 'ponto' : 'pontos';
+      let medalha = i === 0 ? "🥇" : (i === 1 ? "🥈" : (i === 2 ? "🥉" : `${i+1}º`));
 
-    document.getElementById("game-area").style.display = "none";
+      rankingDiv.innerHTML += `
+        <p style="font-size: 1.2em; border-bottom: 1px solid #eee; padding: 10px;">
+          ${medalha} <strong>${r.nome}</strong><br>
+          <span class="rank-highlight" style="color:#2980b9">${r.pontos} ${pontoStr}</span> 
+          <span style="color:#7f8c8d">${tempoStr}</span>
+        </p>`;
+    });
   }
 </script>
 
