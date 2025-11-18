@@ -4,545 +4,577 @@
 <meta charset="UTF-8">
 <title>Quiz de Encaixe</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f3f7;
-    text-align: center;
-    padding: 20px;
-  }
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f3f7;
+    text-align: center;
+    padding: 20px;
+  }
 
-  h1 {
-    color: #2c3e50;
-  }
+  h1 { color: #2c3e50; }
+  .config { margin-bottom: 20px; }
+  #game-area { display: none; }
 
-  .config {
-    margin-bottom: 20px;
-  }
+  /* --- 🔊 ESTILO DO BOTÃO DE SOM (Corrigido) --- */
+  #btn-som {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #e74c3c; /* Vermelho (Desligado) inicial */
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    z-index: 2000; /* Garante que fique ACIMA do modal */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+  }
+  
+  #btn-som.tocando {
+    background-color: #2ecc71; /* Verde quando tocando */
+  }
+  
+  #btn-som:hover {
+    transform: scale(1.05);
+  }
+  /* --------------------------------------------- */
 
-  #game-area {
-    display: none;
-  }
+  #shadow-board, #pieces {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+  }
 
-  #shadow-board, #pieces {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin: 20px 0;
-  }
+  .shadow-slot {
+    width: 250px; 
+    height: 60px;
+    border: 2px dashed #ccc;
+    background-color: #ecf0f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    position: relative; 
+    padding-right: 25px; 
+    padding-left: 5px; 
+    text-align: left; 
+    font-size: 0.85em; 
+  }
 
-  .shadow-slot {
-    width: 250px; 
-    height: 60px;
-    border: 2px dashed #ccc;
-    background-color: #ecf0f1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    position: relative; 
-    padding-right: 25px; 
-    padding-left: 5px; 
-    text-align: left; 
-    font-size: 0.85em; 
-  }
+  .remove-icon {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-weight: bold;
+    color: #e74c3c; 
+    font-size: 1.2em;
+    padding: 0 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+  }
+  
+  .shadow-slot span {
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal;
+      line-height: 1.2;
+  }
 
-  .remove-icon {
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-weight: bold;
-    color: #e74c3c; 
-    font-size: 1.2em;
-    padding: 0 5px;
-    border-radius: 50%;
-    transition: background-color 0.2s;
-  }
-  
-  .shadow-slot span {
-      display: inline-block;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: normal;
-      line-height: 1.2;
-  }
+  .remove-icon:hover { background-color: rgba(231, 76, 60, 0.2); }
+  .shadow-slot.correct { background-color: #a8e6a3; }
+  .shadow-slot.wrong { background-color: #f5a3a3; }
 
-  .remove-icon:hover {
-    background-color: rgba(231, 76, 60, 0.2); 
-  }
+  .piece {
+    width: 150px; 
+    height: 50px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    font-size: 0.9em; 
+  }
 
-  .shadow-slot.correct { background-color: #a8e6a3; }
-  .shadow-slot.wrong { background-color: #f5a3a3; }
+  .piece.used {
+    background-color: #7f8c8d;
+    cursor: not-allowed;
+  }
 
-  .piece {
-    width: 150px; 
-    height: 50px;
-    background-color: #3498db;
-    color: white;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: grab;
-    font-size: 0.9em; 
-  }
+  #timer {
+    font-size: 20px;
+    color: #e74c3c;
+    margin: 10px;
+  }
 
-  .piece.used {
-    background-color: #7f8c8d;
-    cursor: not-allowed;
-  }
+  #result {
+    font-weight: bold;
+    margin-top: 20px;
+    font-size: 18px;
+  }
 
-  #timer {
-    font-size: 20px;
-    color: #e74c3c;
-    margin: 10px;
-  }
+  #ranking {
+    margin-top: 20px;
+    display: none;
+  }
+  
+  .rank-highlight { font-weight: bold; }
 
-  #result {
-    font-weight: bold;
-    margin-top: 20px;
-    font-size: 18px;
-  }
+  .back-button {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background-color: #95a5a6;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    z-index: 1500;
+  }
 
-  #ranking {
-    margin-top: 20px;
-    display: none;
-  }
-  
-  .rank-highlight {
-    font-weight: bold;
-  }
+  #player-name-modal { display: none; }
+  #rules-modal { display: flex; }
 
-  .back-button {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    background-color: #95a5a6;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    text-decoration: none;
-  }
+  #player-name-modal, #rules-modal { 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); 
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
 
-  #player-name-modal { 
-    display: none;
-  }
-  #rules-modal {
-    display: flex;
-  }
+  .modal-content {
+    background-color: #ecf0f1;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    width: 80%;
+    max-width: 400px;
+    text-align: left;
+  }
 
-  #player-name-modal, #rules-modal { 
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); 
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
+  .modal-content h2 {
+    color: #2c3e50;
+    margin-top: 0;
+    border-bottom: 2px solid #bdc3c7;
+    padding-bottom: 10px;
+    text-align: center;
+  }
 
-  .modal-content {
-    background-color: #ecf0f1;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    width: 80%;
-    max-width: 400px;
-    text-align: left;
-  }
+  #rules-text h3 { color: #3498db; margin-top: 20px; }
+  #rules-text ul { padding-left: 20px; }
 
-  .modal-content h2 {
-    color: #2c3e50;
-    margin-top: 0;
-    border-bottom: 2px solid #bdc3c7;
-    padding-bottom: 10px;
-    text-align: center;
-  }
+  .player-input-group { margin-bottom: 15px; }
+  .player-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #34495e;
+  }
 
-  #rules-text h3 {
-      color: #3498db;
-      margin-top: 20px;
-  }
-  #rules-text ul {
-      padding-left: 20px;
-  }
+  .player-input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; 
+  }
 
-  .player-input-group {
-    margin-bottom: 15px;
-  }
+  #submitNames, #closeRules {
+    width: 100%;
+    padding: 10px;
+    background-color: #2ecc71; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
 
-  .player-input-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #34495e;
-  }
-
-  .player-input-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box; 
-  }
-
-  #submitNames, #closeRules {
-    width: 100%;
-    padding: 10px;
-    background-color: #2ecc71; 
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  #submitNames:hover, #closeRules:hover {
-    background-color: #27ae60;
-  }
+  #submitNames:hover, #closeRules:hover { background-color: #27ae60; }
 </style>
 </head>
 <body>
+
+<audio id="musica-fundo" loop>
+    <source src="dark.mp4" type="audio/mp4">
+    </audio>
+
+<button id="btn-som" onclick="alternarSom()">🔇 Som Desligado</button>
 
 <a href="#" class="back-button" onclick="location.reload()">← Reiniciar</a>
 
 <h1 id="game-title">Quiz de Encaixe - Modo Single Player</h1>
 
 <div class="config">
-  <label>Modo de jogo:</label>
-  <select id="numPlayers" onchange="updateTitle()">
-    <option value="1">Single Player</option>
-    <option value="2">2 Jogadores</option>
-    <option value="3">3 Jogadores</option>
-    <option value="4">4 Jogadores</option>
-  </select>
-  <div id="names"></div>
-  <button onclick="startGame()">Iniciar Jogo</button>
+  <label>Modo de jogo:</label>
+  <select id="numPlayers" onchange="updateTitle()">
+    <option value="1">Single Player</option>
+    <option value="2">2 Jogadores</option>
+    <option value="3">3 Jogadores</option>
+    <option value="4">4 Jogadores</option>
+  </select>
+  <div id="names"></div>
+  <button onclick="startGame()">Iniciar Jogo</button>
 </div>
 
 <div id="game-area">
-  <h2 id="currentPlayer"></h2>
-  <div id="timer">Tempo: 5:00</div>
-  <div id="shadow-board"></div>
-  <div id="pieces"></div>
-  <button id="verify" onclick="verificar()">Finalizar Tentativa</button>
-  <div id="result"></div>
+  <h2 id="currentPlayer"></h2>
+  <div id="timer">Tempo: 5:00</div>
+  <div id="shadow-board"></div>
+  <div id="pieces"></div>
+  <button id="verify" onclick="verificar()">Finalizar Tentativa</button>
+  <div id="result"></div>
 </div>
 
 <div id="ranking"></div>
 
 <div id="rules-modal">
-  <div class="modal-content">
-    <h2>🏆 Regras do Quiz de Encaixe 🧩</h2>
-    <div id="rules-text">
-      <p>Este é um jogo de encaixe de conceitos...</p>
-      
-      <h3>Como Funciona a Pontuação?</h3>
-      <ul>
-        <li>1 ponto por resposta correta.</li>
-      </ul>
-    </div>
-    <button id="closeRules" onclick="closeRulesAndShowConfig()">Entendi! Começar Jogo</button>
-  </div>
+  <div class="modal-content">
+    <h2>🏆 Regras do Quiz de Encaixe 🧩</h2>
+    <div id="rules-text">
+      <p>Este é um jogo de encaixe de conceitos...</p>
+      <h3>Como Funciona a Pontuação?</h3>
+      <ul>
+        <li>1 ponto por resposta correta.</li>
+      </ul>
+    </div>
+    <button id="closeRules" onclick="closeRulesAndShowConfig()">Entendi! Começar Jogo</button>
+  </div>
 </div>
 
 <div id="player-name-modal">
-  <div class="modal-content">
-    <h2>Insira os Nomes dos Jogadores</h2>
-    <div id="names-form"></div>
-    <button id="submitNames" onclick="submitNames()">Começar o Quiz</button>
-  </div>
+  <div class="modal-content">
+    <h2>Insira os Nomes dos Jogadores</h2>
+    <div id="names-form"></div>
+    <button id="submitNames" onclick="submitNames()">Começar o Quiz</button>
+  </div>
 </div>
 
 <script>
-  const perguntas = [
-    { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
-    { pergunta: "Corrente elétrica deposita camada metálica sobre a superfície.", resposta: "Eletrodeposição" },
-    { pergunta: "Revestimento físico, sem reação química.", resposta: "PVD (Deposição Física no Vapor)" },
-    { pergunta: "Revestimento obtido por reação química em fase gasosa.", resposta: "CVD (Deposição Química no Vapor)" },
-    { pergunta: "Material fundido é pulverizado sobre a peça.", resposta: "Aspersão térmica" },
-    { pergunta: "União de metal nobre sobre outro para proteger.", resposta: "Cladeamento (Cladding)" },
-    { pergunta: "Íons são inseridos na superfície para aumentar dureza.", resposta: "Implantação iônica" },
-    { pergunta: "Endurece e melhora a superfície sem alterar o interior.", resposta: "Tratamento a laser" },
-    { pergunta: "Cria camada protetora e melhora aderência de tintas.", resposta: "Fosfatização" },
-    { pergunta: "Aumenta resistência e permite coloração do alumínio.", resposta: "Anodização" },
-    { pergunta: "Revestimento químico que evita corrosão.", resposta: "Cromatização" },
-    { pergunta: "Revestimento de zinco para proteger o aço contra ferrugem.", resposta: "Galvanização" },
-    { pergunta: "Suaviza a superfície por ação elétrica e química.", resposta: "Polimento eletrolítico" },
-    { pergunta: "Introduz nitrogênio na superfície para endurecer o aço.", resposta: "Nitretação" },
-    { pergunta: "Forma óxidos protetores na superfície metálica.", resposta: "Oxidação térmica" }
-  ];
+  /* --- 🔊 FUNÇÃO DE SOM --- */
+  function alternarSom() {
+    const audio = document.getElementById('musica-fundo');
+    const botao = document.getElementById('btn-som');
 
-  let currentPlayerIndex = 0;
-  let players = [];
-  let scores = [];
-  let times = []; 
-  let timerInterval;
-  let totalTime = 300; 
-  let timeLeft = totalTime; 
+    if (audio.paused) {
+      audio.play().then(() => {
+        // Sucesso ao tocar
+        botao.innerHTML = "🔊 Som Ligado";
+        botao.classList.add("tocando");
+      }).catch(error => {
+        // Erro (provavelmente arquivo não encontrado)
+        console.log("Erro ao tocar:", error);
+        alert("Erro: Não foi possível tocar o arquivo 'dark.mp4'. Verifique se ele está na pasta.");
+      });
+    } else {
+      audio.pause();
+      botao.innerHTML = "🔇 Som Desligado";
+      botao.classList.remove("tocando");
+    }
+  }
+  /* ------------------------- */
 
-  let selectedNumPlayers = 1;
+  const perguntas = [
+    { pergunta: "Peça mergulhada em metal fundido para evitar corrosão.", resposta: "Imersão a quente" },
+    { pergunta: "Corrente elétrica deposita camada metálica sobre a superfície.", resposta: "Eletrodeposição" },
+    { pergunta: "Revestimento físico, sem reação química.", resposta: "PVD (Deposição Física no Vapor)" },
+    { pergunta: "Revestimento obtido por reação química em fase gasosa.", resposta: "CVD (Deposição Química no Vapor)" },
+    { pergunta: "Material fundido é pulverizado sobre a peça.", resposta: "Aspersão térmica" },
+    { pergunta: "União de metal nobre sobre outro para proteger.", resposta: "Cladeamento (Cladding)" },
+    { pergunta: "Íons são inseridos na superfície para aumentar dureza.", resposta: "Implantação iônica" },
+    { pergunta: "Endurece e melhora a superfície sem alterar o interior.", resposta: "Tratamento a laser" },
+    { pergunta: "Cria camada protetora e melhora aderência de tintas.", resposta: "Fosfatização" },
+    { pergunta: "Aumenta resistência e permite coloração do alumínio.", resposta: "Anodização" },
+    { pergunta: "Revestimento químico que evita corrosão.", resposta: "Cromatização" },
+    { pergunta: "Revestimento de zinco para proteger o aço contra ferrugem.", resposta: "Galvanização" },
+    { pergunta: "Suaviza a superfície por ação elétrica e química.", resposta: "Polimento eletrolítico" },
+    { pergunta: "Introduz nitrogênio na superfície para endurecer o aço.", resposta: "Nitretação" },
+    { pergunta: "Forma óxidos protetores na superfície metálica.", resposta: "Oxidação térmica" }
+  ];
 
-  function closeRulesAndShowConfig() {
-      document.getElementById("rules-modal").style.display = "none";
-      document.querySelector(".config").style.display = "block"; 
-  }
+  let currentPlayerIndex = 0;
+  let players = [];
+  let scores = [];
+  let times = []; 
+  let timerInterval;
+  let totalTime = 300; 
+  let timeLeft = totalTime; 
 
-  /* ⬇️⬇️ NOVO — toca a música de fundo ao iniciar o jogo */
-  function startGame() {
-    document.getElementById("bgm").play().catch(() => {
-        console.log("A música será liberada após interação do usuário.");
-    });
-  /* ⬆️⬆️ */
+  let selectedNumPlayers = 1;
 
-    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
-    document.querySelector(".config").style.display = "none";
+  function closeRulesAndShowConfig() {
+      document.getElementById("rules-modal").style.display = "none";
+      document.querySelector(".config").style.display = "block"; 
+  }
 
-    if (selectedNumPlayers === 1) {
-        players = ["Jogador"];
-        scores = [0];
-        times = [totalTime];
-        document.getElementById("game-area").style.display = "block";
-        iniciarRodada();
-    } else {
-        showNameModal(selectedNumPlayers);
-    }
-  }
+  function startGame() {
+    // Tenta ligar o som automaticamente ao iniciar, mas se falhar, o botão resolve
+    const audio = document.getElementById('musica-fundo');
+    const botao = document.getElementById('btn-som');
+    
+    // Tenta dar play
+    audio.play().then(() => {
+       botao.innerHTML = "🔊 Som Ligado";
+       botao.classList.add("tocando");
+    }).catch(() => {
+       console.log("Autoplay bloqueado, usuário deve clicar no botão.");
+    });
 
-  function updateTitle() {
-    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
-    const gameTitle = document.getElementById("game-title");
-    if (selectedNumPlayers === 1) {
-      gameTitle.textContent = "Quiz de Encaixe - Modo Single Player";
-    } else {
-      gameTitle.textContent = "Quiz de Encaixe - Modo Multiplayer";
-    }
-  }
+    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
+    document.querySelector(".config").style.display = "none";
 
-  function showNameModal(num) {
-      const namesForm = document.getElementById("names-form");
-      namesForm.innerHTML = "";
-      
-      for (let i = 1; i <= num; i++) {
-          const group = document.createElement('div');
-          group.className = 'player-input-group';
-          
-          const label = document.createElement('label');
-          label.textContent = `Nome do Jogador ${i}:`;
+    if (selectedNumPlayers === 1) {
+        players = ["Jogador"];
+        scores = [0];
+        times = [totalTime];
+        document.getElementById("game-area").style.display = "block";
+        iniciarRodada();
+    } else {
+        showNameModal(selectedNumPlayers);
+    }
+  }
 
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.id = `player${i}`;
-          input.placeholder = `Nome do Jogador ${i}`;
-          
-          group.appendChild(label);
-          group.appendChild(input);
-          namesForm.appendChild(group);
-      }
+  function updateTitle() {
+    selectedNumPlayers = parseInt(document.getElementById("numPlayers").value);
+    const gameTitle = document.getElementById("game-title");
+    if (selectedNumPlayers === 1) {
+      gameTitle.textContent = "Quiz de Encaixe - Modo Single Player";
+    } else {
+      gameTitle.textContent = "Quiz de Encaixe - Modo Multiplayer";
+    }
+  }
 
-      document.getElementById("player-name-modal").style.display = "flex";
-  }
+  function showNameModal(num) {
+      const namesForm = document.getElementById("names-form");
+      namesForm.innerHTML = "";
+      
+      for (let i = 1; i <= num; i++) {
+          const group = document.createElement('div');
+          group.className = 'player-input-group';
+          
+          const label = document.createElement('label');
+          label.textContent = `Nome do Jogador ${i}:`;
 
-  function submitNames() {
-      players = [];
-      for (let i = 1; i <= selectedNumPlayers; i++) {
-          const inputElement = document.getElementById(`player${i}`);
-          let name = inputElement.value.trim();
-          if (name === "") {
-              name = `Jogador ${i}`;
-          }
-          players.push(name);
-      }
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.id = `player${i}`;
+          input.placeholder = `Nome do Jogador ${i}`;
+          
+          group.appendChild(label);
+          group.appendChild(input);
+          namesForm.appendChild(group);
+      }
 
-      scores = new Array(selectedNumPlayers).fill(0);
-      times = new Array(selectedNumPlayers).fill(0); 
-      
-      document.getElementById("player-name-modal").style.display = "none";
-      document.getElementById("game-area").style.display = "block";
-      iniciarRodada();
-  }
-  
-  function iniciarRodada() {
-    document.getElementById("result").textContent = "";
-    const currentPlayer = players[currentPlayerIndex];
-    document.getElementById("currentPlayer").textContent = `Vez de: ${currentPlayer}`;
-    gerarPerguntas();
-    resetTimer();
-  }
+      document.getElementById("player-name-modal").style.display = "flex";
+  }
 
-  function gerarPerguntas() {
-    const shadowBoard = document.getElementById("shadow-board");
-    const pieces = document.getElementById("pieces");
-    shadowBoard.innerHTML = "";
-    pieces.innerHTML = "";
+  function submitNames() {
+      players = [];
+      for (let i = 1; i <= selectedNumPlayers; i++) {
+          const inputElement = document.getElementById(`player${i}`);
+          let name = inputElement.value.trim();
+          if (name === "") {
+              name = `Jogador ${i}`;
+          }
+          players.push(name);
+      }
 
-    perguntas.forEach((p, i) => {
-      const slot = document.createElement("div");
-      slot.className = "shadow-slot";
-      slot.dataset.resposta = p.resposta;
-      slot.textContent = p.pergunta; 
-      slot.dataset.pergunta = p.pergunta; 
+      scores = new Array(selectedNumPlayers).fill(0);
+      times = new Array(selectedNumPlayers).fill(0); 
+      
+      document.getElementById("player-name-modal").style.display = "none";
+      document.getElementById("game-area").style.display = "block";
+      iniciarRodada();
+  }
+  
+  function iniciarRodada() {
+    document.getElementById("result").textContent = "";
+    const currentPlayer = players[currentPlayerIndex];
+    document.getElementById("currentPlayer").textContent = `Vez de: ${currentPlayer}`;
+    gerarPerguntas();
+    resetTimer();
+  }
 
-      slot.addEventListener("dragover", e => e.preventDefault());
-      slot.addEventListener("drop", soltar);
-      
-      shadowBoard.appendChild(slot);
-    });
+  function gerarPerguntas() {
+    const shadowBoard = document.getElementById("shadow-board");
+    const pieces = document.getElementById("pieces");
+    shadowBoard.innerHTML = "";
+    pieces.innerHTML = "";
 
-    const respostasEmbaralhadas = [...perguntas]
-      .sort(() => Math.random() - 0.5)
-      .map(p => p.resposta);
+    perguntas.forEach((p, i) => {
+      const slot = document.createElement("div");
+      slot.className = "shadow-slot";
+      slot.dataset.resposta = p.resposta;
+      slot.textContent = p.pergunta; 
+      slot.dataset.pergunta = p.pergunta; 
 
-    respostasEmbaralhadas.forEach(resp => {
-      const piece = document.createElement("div");
-      piece.className = "piece";
-      piece.textContent = resp;
-      piece.draggable = true;
-      piece.addEventListener("dragstart", e => {
-        e.dataTransfer.setData("text", resp);
-      });
-      pieces.appendChild(piece);
-    });
-  }
+      slot.addEventListener("dragover", e => e.preventDefault());
+      slot.addEventListener("drop", soltar);
+      
+      shadowBoard.appendChild(slot);
+    });
 
-  function soltar(e) {
-    e.preventDefault(); 
-    const resposta = e.dataTransfer.getData("text");
-    const slot = e.target.closest('.shadow-slot'); 
-    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === resposta);
+    const respostasEmbaralhadas = [...perguntas]
+      .sort(() => Math.random() - 0.5)
+      .map(p => p.resposta);
 
-    if (slot && !slot.dataset.userAnswer) {
-      const questionText = document.createElement('span');
-      questionText.textContent = slot.dataset.pergunta;
+    respostasEmbaralhadas.forEach(resp => {
+      const piece = document.createElement("div");
+      piece.className = "piece";
+      piece.textContent = resp;
+      piece.draggable = true;
+      piece.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text", resp);
+      });
+      pieces.appendChild(piece);
+    });
+  }
 
-      const answerText = document.createElement('span');
-      answerText.textContent = ` → ${resposta}`;
+  function soltar(e) {
+    e.preventDefault(); 
+    const resposta = e.dataTransfer.getData("text");
+    const slot = e.target.closest('.shadow-slot'); 
+    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === resposta);
 
-      const removeIcon = document.createElement('span');
-      removeIcon.textContent = 'X';
-      removeIcon.classList.add('remove-icon');
-      
-      removeIcon.addEventListener('click', (event) => {
-        event.stopPropagation(); 
-        removerResposta(slot);
-      });
+    if (slot && !slot.dataset.userAnswer) {
+      const questionText = document.createElement('span');
+      questionText.textContent = slot.dataset.pergunta;
 
-      slot.innerHTML = ''; 
-      slot.appendChild(questionText);
-      slot.appendChild(answerText);
-      slot.appendChild(removeIcon);
-      
-      slot.dataset.userAnswer = resposta;
-      piece.classList.add("used");
-      piece.draggable = false;
-    }
-  }
+      const answerText = document.createElement('span');
+      answerText.textContent = ` → ${resposta}`;
 
-  function removerResposta(slot) {
-    const respostaAntiga = slot.dataset.userAnswer;
-    if (!respostaAntiga) return;
+      const removeIcon = document.createElement('span');
+      removeIcon.textContent = 'X';
+      removeIcon.classList.add('remove-icon');
+      
+      removeIcon.addEventListener('click', (event) => {
+        event.stopPropagation(); 
+        removerResposta(slot);
+      });
 
-    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === respostaAntiga);
+      slot.innerHTML = ''; 
+      slot.appendChild(questionText);
+      slot.appendChild(answerText);
+      slot.appendChild(removeIcon);
+      
+      slot.dataset.userAnswer = resposta;
+      piece.classList.add("used");
+      piece.draggable = false;
+    }
+  }
 
-    if (piece) {
-      piece.classList.remove("used");
-      piece.draggable = true;
-    }
+  function removerResposta(slot) {
+    const respostaAntiga = slot.dataset.userAnswer;
+    if (!respostaAntiga) return;
 
-    slot.innerHTML = ''; 
-    slot.textContent = slot.dataset.pergunta;
+    const piece = [...document.querySelectorAll(".piece")].find(p => p.textContent === respostaAntiga);
 
-    delete slot.dataset.userAnswer;
-    slot.classList.remove("correct", "wrong");
-  }
+    if (piece) {
+      piece.classList.remove("used");
+      piece.draggable = true;
+    }
 
-  function verificar() {
-    let acertos = 0;
-    document.querySelectorAll(".shadow-slot").forEach(slot => {
-      const correta = slot.dataset.resposta;
-      const resposta = slot.dataset.userAnswer;
-      slot.classList.remove("correct", "wrong");
-      if (resposta) {
-        if (resposta === correta) {
-          acertos++;
-          slot.classList.add("correct");
-        } else {
-          slot.classList.add("wrong");
-        }
-      }
-    });
+    slot.innerHTML = ''; 
+    slot.textContent = slot.dataset.pergunta;
 
-    scores[currentPlayerIndex] = acertos;
-    times[currentPlayerIndex] = totalTime - timeLeft; 
-    
-    const palavraPontuacao = acertos === 1 ? 'ponto' : 'pontos';
-    
-    document.getElementById("result").textContent = `Você acertou ${acertos} de ${perguntas.length}! Pontuação: ${acertos} ${palavraPontuacao}.`;
+    delete slot.dataset.userAnswer;
+    slot.classList.remove("correct", "wrong");
+  }
 
-    clearInterval(timerInterval);
-    setTimeout(proximaRodada, 4000);
-  }
+  function verificar() {
+    let acertos = 0;
+    document.querySelectorAll(".shadow-slot").forEach(slot => {
+      const correta = slot.dataset.resposta;
+      const resposta = slot.dataset.userAnswer;
+      slot.classList.remove("correct", "wrong");
+      if (resposta) {
+        if (resposta === correta) {
+          acertos++;
+          slot.classList.add("correct");
+        } else {
+          slot.classList.add("wrong");
+        }
+      }
+    });
 
-  function resetTimer() {
-    clearInterval(timerInterval);
-    timeLeft = totalTime; 
-    updateTimer();
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      updateTimer();
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        verificar();
-      }
-    }, 1000);
-  }
+    scores[currentPlayerIndex] = acertos;
+    times[currentPlayerIndex] = totalTime - timeLeft; 
+    
+    const palavraPontuacao = acertos === 1 ? 'ponto' : 'pontos';
+    
+    document.getElementById("result").textContent = `Você acertou ${acertos} de ${perguntas.length}! Pontuação: ${acertos} ${palavraPontuacao}.`;
 
-  function updateTimer() {
-    const min = Math.floor(timeLeft / 60);
-    const sec = String(timeLeft % 60).padStart(2, "0");
-    document.getElementById("timer").textContent = `Tempo: ${min}:${sec}`;
-  }
+    clearInterval(timerInterval);
+    setTimeout(proximaRodada, 4000);
+  }
 
-  function proximaRodada() {
-    currentPlayerIndex++;
-    if (currentPlayerIndex < players.length) {
-      iniciarRodada();
-    } else {
-      mostrarRanking();
-    }
-  }
+  function resetTimer() {
+    clearInterval(timerInterval);
+    timeLeft = totalTime; 
+    updateTimer();
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        verificar();
+      }
+    }, 1000);
+  }
 
-  function mostrarRanking() {
-    const rankingDiv = document.getElementById("ranking");
-    rankingDiv.style.display = "block";
-    rankingDiv.innerHTML = "<h2>🏆 Ranking Final</h2>";
+  function updateTimer() {
+    const min = Math.floor(timeLeft / 60);
+    const sec = String(timeLeft % 60).padStart(2, "0");
+    document.getElementById("timer").textContent = `Tempo: ${min}:${sec}`;
+  }
 
-    const ranking =
-      players.map((p, i) => ({ nome: p, pontos: scores[i], tempo: times[i] }))
-      .sort((a, b) => {
-        if (b.pontos !== a.pontos) return b.pontos - a.pontos;
-        return a.tempo - b.tempo;
-      });
+  function proximaRodada() {
+    currentPlayerIndex++;
+    if (currentPlayerIndex < players.length) {
+      iniciarRodada();
+    } else {
+      mostrarRanking();
+    }
+  }
 
-    ranking.forEach((r, i) => {
-      const tempoStr = r.tempo > 0 ? `(${r.tempo}s)` : '(Tempo máximo)';
-      const palavraPontuacao = r.pontos === 1 ? 'ponto' : 'pontos';
+  function mostrarRanking() {
+    const rankingDiv = document.getElementById("ranking");
+    rankingDiv.style.display = "block";
+    rankingDiv.innerHTML = "<h2>🏆 Ranking Final</h2>";
 
-      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: <span class="rank-highlight">${r.pontos} ${palavraPontuacao}</span> ${tempoStr}</p>`;
-    });
+    const ranking =
+      players.map((p, i) => ({ nome: p, pontos: scores[i], tempo: times[i] }))
+      .sort((a, b) => {
+        if (b.pontos !== a.pontos) return b.pontos - a.pontos;
+        return a.tempo - b.tempo;
+      });
 
-    document.getElementById("game-area").style.display = "none";
-  }
+    ranking.forEach((r, i) => {
+      const tempoStr = r.tempo > 0 ? `(${r.tempo}s)` : '(Tempo máximo)';
+      const palavraPontuacao = r.pontos === 1 ? 'ponto' : 'pontos';
+
+      rankingDiv.innerHTML += `<p>${i + 1}º - ${r.nome}: <span class="rank-highlight">${r.pontos} ${palavraPontuacao}</span> ${tempoStr}</p>`;
+    });
+
+    document.getElementById("game-area").style.display = "none";
+  }
 </script>
-
-<!-- 🔊 MÚSICA DE FUNDO -->
-<audio id="bgm" src="dark.mp4" loop></audio>
 
 </body>
 </html>
