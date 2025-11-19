@@ -315,6 +315,33 @@
   }
   .btn-fechar-creditos:hover { color: white; border-color: white; }
 
+  /* --- NOVO CSS: AVISO DE CRÉDITOS --- */
+  .next-screen-warning {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ccc;
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 0.9em;
+  }
+
+  .loader-container {
+    width: 100%;
+    height: 6px;
+    background-color: #ecf0f1;
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .loader-bar {
+    height: 100%;
+    background-color: #3498db;
+    width: 0%;
+    /* A transição será controlada via JS */
+    transition: width linear; 
+  }
+
 </style>
 </head>
 <body>
@@ -443,7 +470,6 @@
   let scores = [];
   let times = [];
   
-  // MODO TESTE: TEMPO CURTO
   let totalTime = 300; // 5 minutos
   let timeLeft = totalTime;
   let timerInterval;
@@ -468,7 +494,6 @@
 
   /* ================= FLUXO DE INÍCIO ================= */
   function prepararJogo() {
-    // Tenta som
     const audio = document.getElementById('musica-fundo');
     const btn = document.getElementById('btn-som');
     audio.play().then(() => {
@@ -688,6 +713,7 @@
     }
   }
 
+  /* --- NOVA FUNÇÃO DE RANKING COM AVISO --- */
   function mostrarRankingFinal() {
     document.getElementById('game-area').style.display = 'none';
     const rankingDiv = document.getElementById('ranking');
@@ -716,14 +742,40 @@
       `;
     });
 
-    html += '<br><button onclick="location.reload()" style="width:100%; padding:15px; background:#34495e; color:white; border:none; cursor:pointer; border-radius:5px;">Jogar Novamente</button>';
+    const tempoEspera = 5; // 5 segundos
+    html += `
+      <div class="next-screen-warning">
+        🎥 Os créditos aparecerão em <span id="count-credits">${tempoEspera}</span>s...
+        <div class="loader-container">
+           <div id="loader-fill" class="loader-bar"></div>
+        </div>
+      </div>
+      <br>
+      <button onclick="location.reload()" style="width:100%; padding:15px; background:#34495e; color:white; border:none; cursor:pointer; border-radius:5px;">Jogar Novamente Agora</button>
+    `;
     rankingDiv.innerHTML = html;
 
-    // 🕒 GATILHO DOS CRÉDITOS - 3 SEGUNDOS PARA TESTE
-    // Mude 3000 para 15000 para voltar a 15 segundos
+    // Inicia a animação da barra azul
     setTimeout(() => {
-      document.getElementById('creditos-screen').style.display = 'block';
-    }, 3000); 
+        const barra = document.getElementById('loader-fill');
+        if(barra) {
+            barra.style.transition = `width ${tempoEspera}s linear`;
+            barra.style.width = '100%';
+        }
+    }, 100);
+
+    // Inicia a contagem numérica
+    let segundosRestantes = tempoEspera;
+    const intervaloContagem = setInterval(() => {
+        segundosRestantes--;
+        const contador = document.getElementById('count-credits');
+        if(contador) contador.innerText = segundosRestantes;
+
+        if(segundosRestantes <= 0) {
+            clearInterval(intervaloContagem);
+            document.getElementById('creditos-screen').style.display = 'block';
+        }
+    }, 1000);
   }
 </script>
 
