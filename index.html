@@ -11,10 +11,9 @@
     padding: 20px;
     transition: background 0.5s ease;
     padding-bottom: 100px;
-    overflow-x: hidden; /* Evita barra de rolagem horizontal */
+    overflow-x: hidden;
   }
 
-  /* 🌟 Fundo Animado */
   body.fundo-animado {
     background-image: url('imagem.gif');
     background-size: cover;
@@ -34,7 +33,6 @@
   h2 { color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
   .modal-content h2, #result-container h2, #ranking h2 { color: #2c3e50; text-shadow: none; }
 
-  /* 🔊 BOTÃO DE SOM */
   #btn-som {
     position: fixed;
     top: 15px;
@@ -54,7 +52,6 @@
   #btn-som:hover { transform: scale(1.05); }
   #btn-som.tocando { background-color: #2ecc71; }
 
-  /* CONFIG (Tela Inicial) */
   .config { 
     margin-bottom: 20px; 
     background: rgba(255,255,255,0.95);
@@ -67,7 +64,6 @@
   
   #game-area { display: none; }
 
-  /* 🧩 TABULEIRO */
   #shadow-board, #pieces {
     display: flex;
     flex-wrap: wrap;
@@ -156,7 +152,6 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   }
 
-  /* 📝 RESULTADO */
   #result-container {
     display: none;
     background-color: rgba(255, 255, 255, 0.98);
@@ -215,7 +210,6 @@
     z-index: 1500;
   }
 
-  /* MODAIS */
   #player-name-modal, #rules-modal { 
     display: none;
     position: fixed;
@@ -252,17 +246,17 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
 
-  /* 🎬 TELA DE CRÉDITOS (NOVO) */
+  /* 🎬 CRÉDITOS */
   #creditos-screen {
-    display: none; /* Começa invisível */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: black;
-    z-index: 6000; /* Fica na frente de tudo */
-    color: #f1c40f; /* Cor amarela clássica de créditos */
+    z-index: 6000;
+    color: #f1c40f;
     overflow: hidden;
     font-family: "Courier New", Courier, monospace;
     text-align: center;
@@ -272,13 +266,13 @@
     position: absolute;
     width: 80%;
     left: 10%;
-    bottom: -100%; /* Começa abaixo da tela */
-    animation: subirCreditos 25s linear forwards; /* Duração da animação */
+    bottom: -100%;
+    animation: subirCreditos 25s linear forwards;
   }
 
   @keyframes subirCreditos {
     0% { bottom: -100%; }
-    100% { bottom: 120%; } /* Vai até sair por cima */
+    100% { bottom: 120%; }
   }
 
   .creditos-titulo {
@@ -289,9 +283,7 @@
     letter-spacing: 3px;
   }
 
-  .creditos-secao {
-    margin: 50px 0;
-  }
+  .creditos-secao { margin: 50px 0; }
 
   .creditos-subtitulo {
     font-size: 1.5em;
@@ -308,7 +300,6 @@
     color: #ccc;
   }
   
-  /* Botão discreto para fechar créditos se a pessoa cansar */
   .btn-fechar-creditos {
     position: absolute;
     top: 20px;
@@ -389,41 +380,20 @@
       <div class="creditos-subtitulo">Desenvolvido Por</div>
       <p class="creditos-texto">
         Estudantes da Engenharia de Manufatura<br>
-        [Insira Nome do Aluno 1]<br>
-        [Insira Nome do Aluno 2]<br>
-        [Insira Nome do Aluno 3]
-      </p>
-    </div>
-
-    <div class="creditos-secao">
-      <div class="creditos-subtitulo">Supervisão Docente</div>
-      <p class="creditos-texto">
-        Prof. [Nome do Professor]<br>
-        Universidade [Nome da Universidade]
+        [Insira Nome]<br>
+        [Insira Nome]
       </p>
     </div>
 
     <div class="creditos-secao">
       <div class="creditos-subtitulo">Referências Bibliográficas</div>
       <p class="creditos-texto" style="text-align: left; width: 80%; margin: 0 auto; font-size: 1em;">
-        CALLISTER, W. D.; RETHWISCH, D. G. <em>Ciência e Engenharia de Materiais: Uma Introdução</em>. 9. ed. Rio de Janeiro: LTC, 2016.<br><br>
-        ASM INTERNATIONAL. <em>ASM Handbook, Volume 5: Surface Engineering</em>. Materials Park, OH: ASM International, 1994.<br><br>
-        GENTIL, V. <em>Corrosão</em>. 6. ed. Rio de Janeiro: LTC, 2011.<br><br>
-        (Adicione outras referências aqui...)
+        CALLISTER, W. D. <em>Ciência e Engenharia de Materiais</em>.<br>
+        ASM INTERNATIONAL. <em>ASM Handbook</em>.<br>
       </p>
     </div>
 
-    <div class="creditos-secao">
-      <div class="creditos-subtitulo">Agradecimentos</div>
-      <p class="creditos-texto">
-        A todos que testaram este simulador.<br>
-        Obrigado por jogar!
-      </p>
-    </div>
-    
-    <div style="margin-top: 100px;">
-      <p>FIM</p>
-    </div>
+    <div style="margin-top: 100px;"><p>FIM</p></div>
   </div>
 </div>
 
@@ -473,8 +443,9 @@
   let scores = [];
   let times = [];
   
-  let totalTime = 300; 
-  let timeLeft = 300;
+  // MODO TESTE: TEMPO CURTO
+  let totalTime = 300; // 5 minutos
+  let timeLeft = totalTime;
   let timerInterval;
 
   /* ================= FUNÇÕES GERAIS ================= */
@@ -497,6 +468,7 @@
 
   /* ================= FLUXO DE INÍCIO ================= */
   function prepararJogo() {
+    // Tenta som
     const audio = document.getElementById('musica-fundo');
     const btn = document.getElementById('btn-som');
     audio.play().then(() => {
@@ -637,4 +609,123 @@
     const respostaRemovida = slot.dataset.respostaUsuario;
     delete slot.dataset.respostaUsuario;
     slot.innerHTML = `<span>${slot.dataset.perguntaOriginal}</span>`;
-    const
+    const allPieces = document.querySelectorAll('.piece');
+    for(let p of allPieces) {
+      if(p.textContent === respostaRemovida && p.classList.contains('used')) {
+        p.classList.remove('used');
+        p.draggable = true;
+        break;
+      }
+    }
+  }
+
+  /* ================= VERIFICAÇÃO E GABARITO ================= */
+  function verificar() {
+    clearInterval(timerInterval);
+    
+    let acertos = 0;
+    let erros = 0;
+    let htmlGabarito = "";
+
+    const slots = document.querySelectorAll('.shadow-slot');
+    
+    slots.forEach(slot => {
+      const correta = slot.dataset.respostaCorreta;
+      const usuario = slot.dataset.respostaUsuario;
+
+      if(usuario === correta) {
+        acertos++;
+      } else {
+        erros++;
+        const respExibida = usuario ? usuario : "<span style='color:#e74c3c'>(Sem resposta)</span>";
+        htmlGabarito += `
+          <div class="gabarito-row erro">
+            <div class="gabarito-texto">
+              <div style="margin-bottom:4px">${slot.dataset.perguntaOriginal}</div>
+              <span class="gabarito-label">Você colocou:</span> ${respExibida}<br>
+              <span class="gabarito-label" style="color:#27ae60">Correta:</span> <strong>${correta}</strong>
+            </div>
+            <div style="font-size:1.5em">❌</div>
+          </div>
+        `;
+      }
+    });
+
+    const tempoGasto = totalTime - timeLeft;
+    scores[currentPlayerIndex] = acertos;
+    times[currentPlayerIndex] = tempoGasto;
+
+    document.getElementById('game-play-container').style.display = 'none';
+    const resContainer = document.getElementById('result-container');
+    resContainer.style.display = 'block';
+
+    document.getElementById('score-header').innerHTML = `
+        <h3>Você acertou ${acertos} de ${perguntas.length}</h3>
+        <p>Tempo: <strong>${tempoGasto}s</strong></p>
+    `;
+    
+    const divLista = document.getElementById('gabarito-lista');
+    if(erros === 0) {
+      divLista.innerHTML = '<div class="gabarito-row acerto" style="justify-content:center; font-weight:bold;">🎉 PARABÉNS! VOCÊ GABARITOU! 🎉</div>';
+    } else {
+      divLista.innerHTML = '<h4 style="margin-top:0">Onde você errou:</h4>' + htmlGabarito;
+    }
+    
+    const btnCont = document.getElementById('btn-continuar');
+    if(currentPlayerIndex < players.length - 1) {
+      btnCont.textContent = `Próximo Jogador (${players[currentPlayerIndex+1]}) ➡`;
+    } else {
+      btnCont.textContent = "Ver Ranking Final 🏆";
+    }
+  }
+
+  function avancarProximoJogador() {
+    currentPlayerIndex++;
+    if(currentPlayerIndex < players.length) {
+      carregarRodada();
+    } else {
+      mostrarRankingFinal();
+    }
+  }
+
+  function mostrarRankingFinal() {
+    document.getElementById('game-area').style.display = 'none';
+    const rankingDiv = document.getElementById('ranking');
+    rankingDiv.style.display = 'block';
+    
+    let dadosRanking = players.map((nome, i) => {
+      return { nome: nome, pontos: scores[i], tempo: times[i] };
+    });
+
+    dadosRanking.sort((a, b) => {
+      if(b.pontos !== a.pontos) return b.pontos - a.pontos;
+      return a.tempo - b.tempo;
+    });
+
+    let html = '<h2 style="text-align:center; color:#2c3e50">🏆 Classificação Final</h2>';
+    dadosRanking.forEach((d, i) => {
+      let medalha = (i===0) ? "🥇" : (i===1 ? "🥈" : (i===2 ? "🥉" : `${i+1}º`));
+      html += `
+        <div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #eee; align-items:center;">
+          <div style="font-size:1.2em"><strong>${medalha} ${d.nome}</strong></div>
+          <div style="text-align:right">
+            <div style="color:#2980b9; font-weight:bold">${d.pontos} pts</div>
+            <div style="color:#7f8c8d; font-size:0.9em">${d.tempo}s</div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '<br><button onclick="location.reload()" style="width:100%; padding:15px; background:#34495e; color:white; border:none; cursor:pointer; border-radius:5px;">Jogar Novamente</button>';
+    rankingDiv.innerHTML = html;
+
+    // 🕒 GATILHO DOS CRÉDITOS - 3 SEGUNDOS PARA TESTE
+    // Mude 3000 para 15000 para voltar a 15 segundos
+    setTimeout(() => {
+      document.getElementById('creditos-screen').style.display = 'block';
+    }, 3000); 
+  }
+</script>
+
+</body>
+</html>
