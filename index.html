@@ -29,7 +29,7 @@
      color: #2c3e50;
      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-  
+   
   h2 { color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
   .modal-content h2, #result-container h2, #ranking h2 { color: #2c3e50; text-shadow: none; }
 
@@ -52,6 +52,26 @@
   #btn-som:hover { transform: scale(1.05); }
   #btn-som.tocando { background-color: #2ecc71; }
 
+  /* --- NOVO BOTÃO TELA CHEIA --- */
+  #btn-fullscreen {
+    position: fixed;
+    top: 65px; /* Posicionado logo abaixo do botão de som */
+    right: 15px;
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #3498db;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    z-index: 2000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+  }
+  #btn-fullscreen:hover { transform: scale(1.05); }
+  /* ----------------------------- */
+
   .config { 
     margin-bottom: 20px; 
     background: rgba(255,255,255,0.95);
@@ -61,7 +81,7 @@
     max-width: 800px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   }
-  
+   
   #game-area { display: none; }
 
   #shadow-board, #pieces {
@@ -182,7 +202,7 @@
 
   .gabarito-texto { flex: 1; padding-right: 10px; }
   .gabarito-label { font-weight: bold; display: block; font-size: 0.85em; color: #7f8c8d; }
-  
+   
   #btn-continuar {
     display: block;
     width: 100%;
@@ -232,7 +252,7 @@
     max-width: 450px;
     text-align: left;
   }
-  
+   
   .player-input-group { margin-bottom: 10px; }
   .player-input-group input { width: 100%; padding: 8px; margin-top: 5px; }
 
@@ -299,7 +319,7 @@
     line-height: 1.8;
     color: #ccc;
   }
-  
+   
   .btn-fechar-creditos {
     position: absolute;
     top: 20px;
@@ -351,6 +371,7 @@
 </audio>
 
 <button id="btn-som" onclick="alternarSom()">🔇 Som Desligado</button>
+<button id="btn-fullscreen" onclick="alternarTelaCheia()">🔲 Tela Cheia</button>
 
 <a href="#" class="back-button" onclick="location.reload()">← Reiniciar</a>
 
@@ -402,7 +423,7 @@
   <div class="creditos-container">
     <div class="creditos-titulo">Engenharia de Superfície</div>
     <p>Trabalho Prático de Simulação</p>
-    
+     
     <div class="creditos-secao">
       <div class="creditos-subtitulo">Desenvolvido Por</div>
       <p class="creditos-texto">
@@ -481,7 +502,7 @@
   let currentPlayerIndex = 0;
   let scores = [];
   let times = [];
-  
+   
   let totalTime = 300; // 5 minutos
   let timeLeft = totalTime;
   let timerInterval;
@@ -501,6 +522,39 @@
       btn.classList.remove('tocando');
     }
   }
+  
+  /* --- NOVA FUNÇÃO TELA CHEIA --- */
+  function alternarTelaCheia() {
+      const docElm = document.documentElement;
+      const btn = document.getElementById('btn-fullscreen');
+
+      const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+
+      if (!isFullscreen) {
+          if (docElm.requestFullscreen) {
+              docElm.requestFullscreen();
+          } else if (docElm.mozRequestFullScreen) {
+              docElm.mozRequestFullScreen();
+          } else if (docElm.webkitRequestFullScreen) {
+              docElm.webkitRequestFullScreen();
+          } else if (docElm.msRequestFullscreen) {
+              docElm.msRequestFullscreen();
+          }
+          btn.innerHTML = '縮 Sair Tela Cheia';
+      } else {
+          if (document.exitFullscreen) {
+              document.exitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+          } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) {
+              document.msExitFullscreen();
+          }
+          btn.innerHTML = '🔲 Tela Cheia';
+      }
+  }
+  /* ------------------------------ */
 
   function ativarFundoAnimado() { document.body.classList.add('fundo-animado'); }
 
